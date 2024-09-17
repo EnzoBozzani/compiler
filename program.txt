@@ -1,0 +1,13 @@
+number a = 10.5;
+
+number b = 4.5;
+
+number highest;
+
+if (a > b){
+    highest = a;
+}
+else {
+    highest = b;
+}
+
