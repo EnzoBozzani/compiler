@@ -9,7 +9,7 @@ class Token():
     __lexem: str
     __type: str
 
-    def __init__(self, lexem: str, type: str) -> None:
+    def __init__(self, type: str, lexem: str) -> None:
         self.__lexem = lexem
         self.__type = type
 
