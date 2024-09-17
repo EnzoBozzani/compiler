@@ -39,13 +39,24 @@ def char_belongs_to_group(char: str, group: list[str]) -> bool:
     return False
 
 
-def verify(word_to_be_search: str, pattern: str) -> bool:
+def word_matches_pattern(word_to_be_matched: str, pattern: str) -> bool:
     groups: list[list[str]] = []
 
-    word = word_to_be_search
+    word = word_to_be_matched
 
+    if word.startswith('"') and word.endswith('"'):
+        return True
+
+    if word.startswith("'") and word.endswith("'"):
+        return True
+
+    if len(pattern) == 1:
+        return word == pattern
+
+    # normalization start
     group_start = 0
     group_end = len(pattern)
+
     for i in range(len(pattern)):
         char = pattern[i]
 
@@ -75,7 +86,10 @@ def verify(word_to_be_search: str, pattern: str) -> bool:
         elif (not (i < group_end and i > group_start - 1)) and (char != '*' and char != '+'):  # noqa: E501
             groups.append([char])
 
-    print(groups)
+    if (len(groups) == 0):
+        for char in pattern:
+            groups.append([char])
+    # normalization end
 
     for arr in groups:
         if arr[-1] == '*':
@@ -97,9 +111,4 @@ def verify(word_to_be_search: str, pattern: str) -> bool:
             else:
                 return False
 
-    return True
-
-
-print(verify('main', "(a-z|A-Z)(a-z|A-Z|0-9|_)*"))
-print(verify('10.5', '(0-9)*.(0-9)+'))
-print(verify('ifk', 'if'))
+    return len(word) == 0
