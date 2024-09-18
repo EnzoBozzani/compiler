@@ -1,13 +1,18 @@
-number a = 10.5;
+number a = 10.5
 
-number b = 4.5;
+number b = 4.5
+string str = "oi"
+bool condition = true
 
-number highest;
+number highest
 
 if (a > b){
-    highest = a;
+    highest = a
 }
-else {
-    highest = b;
+else{
+    highest = b
+}
+if (condition){
+    str = "tchau"
 }
 

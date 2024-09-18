@@ -12,7 +12,6 @@ patterns: list[tuple[str, str]] = [
     ('bool_reserved', 'bool'),
     ('true', 'true'),
     ('false', 'false'),
-    ('semicolon', ';'),
     ('op', '('),
     ('cp', ')'),
     ('gt', '>'),
@@ -24,17 +23,29 @@ patterns: list[tuple[str, str]] = [
     ('open_curly_braces', '{'),
     ('close_curly_braces', '}'),
     ('string', '".*"'),
+    ('add', '+'),
+    ('sub', '-'),
+    ('mult', '*'),
+    ('div', '/'),
     ('number', '(0-9)+ | (0-9)*.(0-9)+'),
-    ('id', '(a-z|A-Z)(a-z|A-Z|0-9|_)*'),
+    ('id', '(a-z|A-Z)(a-z|A-Z|0-9|_)*')
 ]
 
 unique_patterns: list[tuple[str, str]] = [
     ('op', '('),
     ('cp', ')'),
-    ('semicolon', ';'),
+    ('add', '+'),
+    ('sub', '-'),
+    ('mult', '*'),
+    ('div', '/'),
     ('open_curly_braces', '{'),
     ('close_curly_braces', '}'),
-    ('attr', '=')
+    ('gt', '>'),
+    ('attr', '='),
+    ('equal', '=='),
+    ('gte', '>='),
+    ('lte', '<='),
+    ('lt', '<'),
 ]
 
 
@@ -58,15 +69,31 @@ def main() -> None:
                             words[i] += element
                         words.insert(i + 1, pattern)
 
-    # for i in range(len(words)):
-    #     if words[i] == '':
-    #         words.pop(i)
+    count = 0
+    while (count < len(words)):
+        if words[count] == '':
+            words.pop(count)
+            count -= 1
+        count += 1
 
     print(words)
     for word in words:
+        token_recognized = False
         for typ, pattern in patterns:
-            if word_matches_pattern(word, pattern):
+            if ' | ' in pattern:
+                for subpattern in pattern.split(' | '):
+                    token_recognized = word_matches_pattern(word, subpattern)
+                    if token_recognized:
+                        break
+            else:
+                token_recognized = word_matches_pattern(word, pattern)
+
+            if token_recognized:
                 print(Token(typ, word).to_string())
+                break
+
+        if not token_recognized:
+            raise Exception(f"Token not recognized: '{word}'")
 
 
 if __name__ == '__main__':

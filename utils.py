@@ -1,4 +1,4 @@
-az_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']  # noqa: E501
+az_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 az_upper_list = [char.upper() for char in az_list]
 numbers_list = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
@@ -44,10 +44,7 @@ def word_matches_pattern(word_to_be_matched: str, pattern: str) -> bool:
 
     word = word_to_be_matched
 
-    if word.startswith('"') and word.endswith('"'):
-        return True
-
-    if word.startswith("'") and word.endswith("'"):
+    if word.startswith('"') and word.endswith('"') and pattern == '".*"':
         return True
 
     if len(pattern) == 1:
@@ -83,7 +80,7 @@ def word_matches_pattern(word_to_be_matched: str, pattern: str) -> bool:
                     group.append('+')
 
             groups.append(group)
-        elif (not (i < group_end and i > group_start - 1)) and (char != '*' and char != '+'):  # noqa: E501
+        elif (not (i < group_end and i > group_start - 1)) and (char != '*' and char != '+'):
             groups.append([char])
 
     if (len(groups) == 0):
@@ -105,6 +102,8 @@ def word_matches_pattern(word_to_be_matched: str, pattern: str) -> bool:
                 else:
                     return False
         else:
+            if len(word) == 0:
+                return False
             char = word[0]
             if char_belongs_to_group(char, arr):
                 word = word[1:]
