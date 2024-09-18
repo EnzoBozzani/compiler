@@ -1,3 +1,5 @@
+from constants import unique_patterns
+
 az_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 az_upper_list = [char.upper() for char in az_list]
 numbers_list = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -111,3 +113,33 @@ def word_matches_pattern(word_to_be_matched: str, pattern: str) -> bool:
                 return False
 
     return len(word) == 0
+
+
+def extract_words_from_program(filename: str) -> list[str]:
+    words: list[str] = []
+
+    with open(filename, 'r') as file:
+        for line in file.readlines():
+            for word in line.split(' '):
+                words.append(word.strip())
+
+    for i in range(len(words)):
+        word = words[i]
+        if (is_word(word)):
+            for j in range(len(word)):
+                char = word[j]
+                for typ, pattern in unique_patterns:  # TODO is here
+                    if char == pattern:
+                        words[i] = ''
+                        for element in word.split(char):
+                            words[i] += element
+                        words.insert(i + 1, pattern)
+
+    count = 0
+    while (count < len(words)):
+        if words[count] == '':
+            words.pop(count)
+            count -= 1
+        count += 1
+
+    return words
