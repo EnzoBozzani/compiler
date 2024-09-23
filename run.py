@@ -6,7 +6,6 @@ from constants import patterns
 def main() -> None:
     words = extract_words_from_program('program.txt')
 
-    print(words)
     for word in words:
         token_recognized = False
         for typ, pattern in patterns:
