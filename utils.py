@@ -123,17 +123,33 @@ def extract_words_from_program(filename: str) -> list[str]:
             for word in line.split(' '):
                 words.append(word.strip())
 
-    for i in range(len(words)):
+    count = len(words)
+    for i in range(count):
         word = words[i]
         if (is_word(word)):
+            new_word = ''
+            word_split: list[str] = []
             for j in range(len(word)):
                 char = word[j]
-                for typ, pattern in unique_patterns:  # TODO is here
+                char_belongs_to_pattern = False
+                for _, pattern in unique_patterns:
                     if char == pattern:
-                        words[i] = ''
-                        for element in word.split(char):
-                            words[i] += element
-                        words.insert(i + 1, pattern)
+                        char_belongs_to_pattern = True
+                        break
+                if char_belongs_to_pattern:
+                    if new_word != '':
+                        word_split.append(new_word)
+                        new_word = ''
+                    word_split.append(char)
+                else:
+                    new_word += char
+
+            if len(word_split) >= 1:
+                words.pop(i)
+                count -= 1
+                for index in range(len(word_split)):
+                    words.insert(i + index, word_split[index])
+                    count += 1
 
     count = 0
     while (count < len(words)):
@@ -141,5 +157,29 @@ def extract_words_from_program(filename: str) -> list[str]:
             words.pop(count)
             count -= 1
         count += 1
+
+    count = len(words)
+    for i in range(count):
+        word = words[i]
+
+        if (i + 1 >= count):
+            break
+
+        next_word = words[i + 1]
+
+        if word == '>' and next_word == '=':
+            words[i] = '>='
+            words.pop(i + 1)
+            count -= 1
+
+        elif word == '<' and next_word == '=':
+            words[i] = '<='
+            words.pop(i + 1)
+            count -= 1
+
+        elif word == '=' and next_word == '=':
+            words[i] = '=='
+            words.pop(i + 1)
+            count -= 1
 
     return words
