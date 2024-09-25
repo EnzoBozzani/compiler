@@ -1,10 +1,16 @@
 from utils import word_matches_pattern, extract_words_from_program
 from models import Token
 from constants import patterns
+import sys
 
 
 def main() -> None:
-    words = extract_words_from_program('program.txt')
+    if len(sys.argv) < 2:
+        raise Exception('Pass the file to be compiled as last parameter! (e.g. python run.py program.fei)')
+
+    file = sys.argv[1]
+
+    words = extract_words_from_program(sys.argv[1])
 
     for word in words:
         token_recognized = False
