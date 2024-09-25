@@ -1,1 +1,13 @@
-TODO: handle unique patterns (such as '(' or '}') when these are conected to other words
+## Run:
+
+```bash
+./run your_file.fei
+```
+
+## Example:
+
+```bash
+./run program.fei
+```
+
+## Tasks:

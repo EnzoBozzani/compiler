@@ -1,0 +1,18 @@
+number abc = 10.5
+
+number b = 4.5
+string str = "oi"
+bool condition = true
+
+number highest
+
+if (abc>=b){
+    highest = a
+}
+else{
+    highest = b
+}
+if (condition){
+    str = "tchau"
+}
+
