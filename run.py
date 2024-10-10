@@ -12,6 +12,8 @@ def main() -> None:
 
     words = extract_words_from_program(sys.argv[1])
 
+    tokens: list[Token] = []
+
     for word in words:
         token_recognized = False
         for typ, pattern in patterns:
@@ -24,11 +26,13 @@ def main() -> None:
                 token_recognized = word_matches_pattern(word, pattern)
 
             if token_recognized:
-                print(Token(typ, word).to_string())
+                tokens.append(Token(typ, word).to_string())
                 break
 
         if not token_recognized:
             raise Exception(f"Token not recognized: '{word}'")
+        
+    
 
 
 if __name__ == '__main__':
