@@ -1,4 +1,5 @@
-from constants import unique_patterns
+from constants import unique_patterns, grammar
+from models.token import Token
 
 az_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 az_upper_list = [char.upper() for char in az_list]
@@ -183,3 +184,20 @@ def extract_words_from_program(filename: str) -> list[str]:
             count -= 1
 
     return words
+
+
+def belongs_to_grammar_rule(token: Token, rule: str):
+    if isinstance(grammar[rule], list[str]):
+        for option in grammar[rule]:
+            if (token.getType() == option):
+                return True
+    else:
+        raise NotImplementedError()
+        # for rule_option in grammar[rule]:
+        #     for option in 
+
+    return False
+
+
+def check_grammar(tokens: list[Token]):
+    raise NotImplementedError()

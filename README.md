@@ -11,3 +11,5 @@
 ```
 
 ## Tasks:
+
+-   Método que verifica se token pertence a gramática x

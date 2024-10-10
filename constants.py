@@ -1,11 +1,11 @@
 patterns: list[tuple[str, str]] = [
-    ('if', 'if'),
-    ('else', 'else'),
+    ('if_reserved_reserved', 'if'),
+    ('else_reserved', 'else'),
     ('number_reserved', 'number'),
     ('string_reserved', 'string'),
-    ('while', 'while'),
-    ('for', 'for'),
-    ('in', 'in'),
+    ('while_reserved', 'while'),
+    ('for_reserved', 'for'),
+    ('in_reserved', 'in'),
     ('bool_reserved', 'bool'),
     ('true', 'true'),
     ('false', 'false'),
@@ -44,3 +44,23 @@ unique_patterns: list[tuple[str, str]] = [
     ('lte', '<='),
     ('lt', '<'),
 ]
+
+grammar: dict[str, list[str] | list[list[str]]] = {
+    'math_operator': [['add'], ['sub'], ['mult'], ['div']],
+    'math_expression': [
+        ['number', 'math_operator', 'id'],
+        ['number', 'math_operator', 'number'],
+        ['id', 'math_operator', 'id'],
+        ['id', 'math_operator', 'number'], 
+        ['number', 'math_operator', 'math_expression'],
+        ['math_expression', 'math_operator', 'number'],
+        ['id', 'math_operator', 'math_expression'],
+        ['math_expression', 'math_operator', 'id'],
+        ['math_expression', 'math_operator', 'math_expression'],
+        ['op', 'math_expression', 'cp']
+    ],
+    'value': ['number', 'id', 'true', 'false', 'math_expression'],
+    'condition': [['value'], ['value', 'comparison_operator', 'value']],
+    'if': ['if_reserved', 'op', 'condition', 'cp', 'open_curly_braces', '*', 'close_curly_braces'],
+    '*': '*',
+}
