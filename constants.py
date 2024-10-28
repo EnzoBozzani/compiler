@@ -45,22 +45,25 @@ unique_patterns: list[tuple[str, str]] = [
     ('lt', '<'),
 ]
 
-grammar: dict[str, list[str] | list[list[str]]] = {
-    'math_operator': [['add'], ['sub'], ['mult'], ['div']],
+grammar: dict[str, list[str]] = {
+    'math_operator': ['add', 'sub', 'mult', 'div'],
     'math_expression': [
-        ['number', 'math_operator', 'id'],
-        ['number', 'math_operator', 'number'],
-        ['id', 'math_operator', 'id'],
-        ['id', 'math_operator', 'number'], 
-        ['number', 'math_operator', 'math_expression'],
-        ['math_expression', 'math_operator', 'number'],
-        ['id', 'math_operator', 'math_expression'],
-        ['math_expression', 'math_operator', 'id'],
-        ['math_expression', 'math_operator', 'math_expression'],
-        ['op', 'math_expression', 'cp']
+        'number math_operator id',
+        'number math_operator number',
+        'id math_operator id',
+        'id math_operator number', 
+        'number math_operator math_expression',
+        'math_expression math_operator number',
+        'id math_operator math_expression',
+        'math_expression math_operator id',
+        'math_expression math_operator math_expression',
+        'op math_expression cp'
     ],
-    'value': ['number', 'id', 'true', 'false', 'math_expression'],
-    'condition': [['value'], ['value', 'comparison_operator', 'value']],
+    'value': ['number', 'id', 'true', 'false', 'math_expression', 'string'],
+    'condition': ['value', 'value comparison_operator value'],
     'if': ['if_reserved', 'op', 'condition', 'cp', 'open_curly_braces', '*', 'close_curly_braces'],
-    '*': '*',
+    '*': ['*'],
+    'type': ['number_reserved', 'bool_reserved', 'string_reserved'],
+    'attr_expression': ['type id attr value', 'id attr value'],
+    'init_expression': ['type id'],
 }
