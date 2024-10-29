@@ -1,7 +1,7 @@
 import sys
 
 from lexical import lexical_analysis
-from syntatic import syntatic_analysis
+from models import SyntaticAnalysis
 
 
 def main() -> None:
@@ -10,7 +10,7 @@ def main() -> None:
 
     tokens = lexical_analysis(sys.argv[1])
 
-    tree = syntatic_analysis(tokens)
+    syntatic_analyzer = SyntaticAnalysis(tokens)
         
 
 if __name__ == '__main__':

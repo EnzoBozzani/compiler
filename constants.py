@@ -52,9 +52,11 @@ grammar: dict[str, list[str]] = {
         'number math_operator number',
         'id math_operator id',
         'id math_operator number', 
-        'number math_operator math_expression',
+    ],
+    'math': [
         'math_expression math_operator number',
         'id math_operator math_expression',
+        'number math_operator math_expression',
         'math_expression math_operator id',
         'math_expression math_operator math_expression',
         'op math_expression cp'

@@ -1,4 +1,4 @@
-from models.token import Token
+from models import Token
 from constants import patterns, unique_patterns
 from utils import char_belongs_to_group, is_word
 
