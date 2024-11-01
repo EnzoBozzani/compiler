@@ -1,16 +1,15 @@
 import sys
 
-from lexical import lexical_analysis
-from models import SyntaticAnalysis
+from models import SyntaticAnalysis, LexicalAnalysis
 
 
 def main() -> None:
     if len(sys.argv) < 2:
-        raise Exception('Pass the file to be compiled as last parameter! (e.g. python run.py program.fei)')
+        raise Exception('Informe o arquivo a ser compilado! (ex. python run.py program.fei)')
 
-    tokens = lexical_analysis(sys.argv[1])
+    lexical = LexicalAnalysis(sys.argv[1])
 
-    syntatic_analyzer = SyntaticAnalysis([t.getType() for t in tokens])
+    syntatic_analyzer = SyntaticAnalysis([t.to_string() for t in lexical.tokens])
 
         
 
