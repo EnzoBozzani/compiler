@@ -1,5 +1,5 @@
 patterns: list[tuple[str, str]] = [
-    ('if_reserved_reserved', 'if'),
+    ('if_reserved', 'if'),
     ('else_reserved', 'else'),
     ('number_reserved', 'number'),
     ('string_reserved', 'string'),

@@ -1,3 +1,5 @@
+import sys
+
 from models import Token
 from constants import patterns, unique_patterns
 from utils import char_belongs_to_group, is_word
@@ -23,7 +25,8 @@ class LexicalAnalysis():
                     tokens.append(Token(typ, word))
                     break   
             if not token_recognized:
-                raise Exception(f"Token não reconhecido: '{word}'")
+                print(f"ERROR: Token não reconhecido: '{word}'")
+                sys.exit()
 
         self.tokens: list[Token] = tokens
 

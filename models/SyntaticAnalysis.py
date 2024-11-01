@@ -1,9 +1,12 @@
+import sys
+
 from models import Token
 
 class SyntaticAnalysis():
     def __init__(self, tokens: list[Token]):
         self.tokens = tokens
         self.previous = []
+        self.trees = []
         print([t.to_string() for t in tokens])
 
         self.run()
@@ -11,16 +14,20 @@ class SyntaticAnalysis():
     def run(self):
         while len(self.tokens) > 0:
             self.token = self.next_token()
+            print('c', self.token.to_string())
             if self.if_statement():
                 print(f"Success: if.")
+                # logica pra buildar a ast
             elif self.attr_expression():
                 print(f"Success: attr_expression.")
             elif self.init_expression():
                 print(f"Success: init_expression.")
+                # logica pra buildar a ast
+                # logica pra buildar a ast
             # adicionar aqui outras expressões como for, while
             else:
-                print(f"Error: No matching rule for {self.token.to_string()}")
-                break 
+                print(f"ERROR: No matching rule for {self.token.to_string()}")
+                sys.exit()
 
                
 
@@ -31,6 +38,7 @@ class SyntaticAnalysis():
     
     def previous_token(self):
         self.tokens.insert(0, self.previous.pop(0)) 
+        self.token = self.next_token()
     
     def error(self, rule: str):
         self.errors.append(f"Not expected: {self.token}. Rule: {rule}")
@@ -42,6 +50,7 @@ class SyntaticAnalysis():
                 return True
             else:
                 self.previous_token()
+        
     
         return False
 
@@ -58,6 +67,7 @@ class SyntaticAnalysis():
             else:
                 self.previous_token()
         
+        self.previous_token()
         return True
 
     def math_t(self):
@@ -83,6 +93,7 @@ class SyntaticAnalysis():
             else:
                 self.previous_token()
         
+        self.previous_token()
         return True
     
     def math_f(self):
@@ -122,6 +133,7 @@ class SyntaticAnalysis():
             else: 
                 self.previous_token()
         
+        self.previous_token()
         return True
     
     def math_d(self):
@@ -131,7 +143,20 @@ class SyntaticAnalysis():
         return False
     
     def value(self):
-        if self.token.get_type() in ['number', 'id', 'true', 'false', 'string']:
+        if self.token.get_type() in ['number', 'id']:
+            self.token = self.next_token()
+            if self.token.get_type() in ['add', 'sub', 'div', 'mult']:
+                self.token = self.next_token()
+                if self.math_e():
+                    return True
+                else:
+                    self.previous_token()
+                    self.previous_token()
+            else:
+                self.previous_token()
+
+        self.token = self.next_token()
+        if self.token.get_type() in ['number', 'id', 'string', 'true', 'false']:
             return True
         elif self.math_e():
             return True
@@ -234,6 +259,7 @@ class SyntaticAnalysis():
                 else:
                     self.previous_token()
                     self.previous_token()
+        
             else:
                 self.previous_token()
         elif self.token.get_type() == 'id':
