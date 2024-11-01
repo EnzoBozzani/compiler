@@ -10,7 +10,8 @@ def main() -> None:
 
     tokens = lexical_analysis(sys.argv[1])
 
-    syntatic_analyzer = SyntaticAnalysis(tokens)
+    syntatic_analyzer = SyntaticAnalysis([t.getType() for t in tokens])
+
         
 
 if __name__ == '__main__':

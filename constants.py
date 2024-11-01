@@ -46,25 +46,18 @@ unique_patterns: list[tuple[str, str]] = [
 ]
 
 grammar: dict[str, list[str]] = {
-    'math_operator': ['add', 'sub', 'mult', 'div'],
-    'math_expression': [
-        'number math_operator id',
-        'number math_operator number',
-        'id math_operator id',
-        'id math_operator number', 
-    ],
-    'math': [
-        'math_expression math_operator number',
-        'id math_operator math_expression',
-        'number math_operator math_expression',
-        'math_expression math_operator id',
-        'math_expression math_operator math_expression',
-        'op math_expression cp'
-    ],
+    'math_e': ['math_t math_e*'],
+    'math_e*': ['add math_t math_e*', 'sub math_t math_e*', None],
+    'math_t': ['math_f math_t*'],
+    'math_t*': ['mult math_f math_t*', 'div math_f math_t*', None],
+    'math_f': ['op math_e cp', 'math_n'],
+    'math_n': ['math_d math_n*'],
+    'math_n*': ['math_d math_n*', None],
+    'math_d': ['id', 'number'],
     'value': ['number', 'id', 'true', 'false', 'math_expression', 'string'],
     'condition': ['value', 'value comparison_operator value'],
     'if': ['if_reserved', 'op', 'condition', 'cp', 'open_curly_braces', '*', 'close_curly_braces'],
-    '*': ['*'],
+    '*': [None],
     'type': ['number_reserved', 'bool_reserved', 'string_reserved'],
     'attr_expression': ['type id attr value', 'id attr value'],
     'init_expression': ['type id'],
