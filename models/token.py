@@ -13,10 +13,10 @@ class Token():
         self.__lexem = lexem
         self.__type = type
 
-    def getLexem(self) -> str:
+    def get_lexem(self) -> str:
         return self.__lexem
 
-    def getType(self) -> str:
+    def get_type(self) -> str:
         return self.__type
 
     def to_string(self) -> str:

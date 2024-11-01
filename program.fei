@@ -1,6 +1,6 @@
 number abc = 10.5
 
-number b = 4.5
+number b = 4.5 + abc
 string str = "oi"
 bool condition = true
 
@@ -15,5 +15,3 @@ else{
 if (condition){
     str = "tchau"
 }
-
-+ -

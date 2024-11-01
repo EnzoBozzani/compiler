@@ -9,7 +9,7 @@ def main() -> None:
 
     lexical = LexicalAnalysis(sys.argv[1])
 
-    syntatic_analyzer = SyntaticAnalysis([t.to_string() for t in lexical.tokens])
+    syntatic_analyzer = SyntaticAnalysis(lexical.tokens)
 
         
 
