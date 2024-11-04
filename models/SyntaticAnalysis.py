@@ -5,47 +5,60 @@ from models import Token
 class SyntaticAnalysis():
     def __init__(self, tokens: list[Token]):
         self.tokens = tokens
-        self.previous = []
+        self.previous_tokens = []
+        self.expecting = 0
+        self.previous = None
         self.trees = []
-        print([t.to_string() for t in tokens])
 
         self.run()
 
     def run(self):
+        first = True
+        self.token = self.tokens.pop(0)
         while len(self.tokens) > 0:
-            self.token = self.next_token()
-            print('c', self.token.to_string())
+            if first: 
+                first = False
+            else:
+                self.next_token()
+
             if self.if_statement():
                 print(f"Success: if.")
-                # logica pra buildar a ast
+                # TODO: buildar ast
             elif self.attr_expression():
                 print(f"Success: attr_expression.")
+                # TODO: buildar ast
             elif self.init_expression():
                 print(f"Success: init_expression.")
-                # logica pra buildar a ast
-                # logica pra buildar a ast
-            # adicionar aqui outras expressões como for, while
+                # TODO: buildar ast
+            # TODO:
             else:
                 print(f"ERROR: No matching rule for {self.token.to_string()}")
                 sys.exit()
+            
+            if (self.expecting == 0):
+                pass
+                # TODO: lógica pra sair do self.run
 
                
 
     def next_token(self):
-        t = self.tokens.pop(0)
-        self.previous.append(t)
-        return t
+        if self.previous is not None: self.previous_tokens.insert(0, self.previous)
+        self.previous = self.token
+        self.token = self.tokens.pop(0)
+        # print(f"TOKEN: {self.token.to_string()}")
+        # print(f"PREVIOUS: {self.previous.to_string()}")
     
     def previous_token(self):
-        self.tokens.insert(0, self.previous.pop(0)) 
-        self.token = self.next_token()
+        if self.token is not None: self.tokens.insert(0, self.token)
+        self.token = self.previous
+        self.previous = self.previous_tokens.pop(0) if len(self.previous_tokens) > 0 else None
     
     def error(self, rule: str):
         self.errors.append(f"Not expected: {self.token}. Rule: {rule}")
     
     def math_e(self):
         if self.math_t():
-            self.token = self.next_token()
+            self.next_token()
             if self.math_e_():
                 return True
             else:
@@ -56,9 +69,9 @@ class SyntaticAnalysis():
 
     def math_e_(self):
         if self.token.get_type() in ['add', 'sub']:
-            self.token = self.next_token()
+            self.next_token()
             if self.math_t():
-                self.token = self.next_token()
+                self.next_token()
                 if self.math_e_():
                     return True
                 else:
@@ -72,7 +85,7 @@ class SyntaticAnalysis():
 
     def math_t(self):
         if self.math_f():
-            self.token = self.next_token()
+            self.next_token()
             if self.math_t_():
                 return True
             else:
@@ -82,9 +95,9 @@ class SyntaticAnalysis():
 
     def math_t_(self):
         if self.token.get_type() in ['mult', 'div']:
-            self.token = self.next_token()
+            self.next_token()
             if self.math_f():
-                self.token = self.next_token()
+                self.next_token()
                 if self.math_t_():
                     return True
                 else: 
@@ -98,9 +111,9 @@ class SyntaticAnalysis():
     
     def math_f(self):
         if self.token.get_type() == 'op':
-            self.token = self.next_token()
+            self.next_token()
             if self.math_e():
-                self.token = self.next_token()
+                self.next_token()
                 if self.token.get_type() == 'cp':
                     return True
                 else: 
@@ -117,7 +130,7 @@ class SyntaticAnalysis():
     
     def math_n(self):
         if self.math_d():
-            self.token = self.next_token()
+            self.next_token()
             if self.math_n_():
                 return True
             else:
@@ -127,7 +140,7 @@ class SyntaticAnalysis():
     
     def math_n_(self):
         if self.math_d():
-            self.token = self.next_token()
+            self.next_token()
             if self.math_n_():
                 return True
             else: 
@@ -144,9 +157,9 @@ class SyntaticAnalysis():
     
     def value(self):
         if self.token.get_type() in ['number', 'id']:
-            self.token = self.next_token()
+            self.next_token()
             if self.token.get_type() in ['add', 'sub', 'div', 'mult']:
-                self.token = self.next_token()
+                self.next_token()
                 if self.math_e():
                     return True
                 else:
@@ -155,7 +168,6 @@ class SyntaticAnalysis():
             else:
                 self.previous_token()
 
-        self.token = self.next_token()
         if self.token.get_type() in ['number', 'id', 'string', 'true', 'false']:
             return True
         elif self.math_e():
@@ -165,7 +177,7 @@ class SyntaticAnalysis():
 
     def condition(self):
         if self.value():
-            self.token = self.next_token()
+            self.next_token()
             if self.condition_():
                 return True
             else:
@@ -175,7 +187,7 @@ class SyntaticAnalysis():
     
     def condition_(self):
         if self.comparison_operator():
-            self.token = self.next_token()
+            self.next_token()
             if self.value():
                 return True
             else:
@@ -191,18 +203,20 @@ class SyntaticAnalysis():
     
     def if_statement(self):
         if self.token.get_type() == 'if_reserved':
-            self.token = self.next_token()
+            self.next_token()
             if self.token.get_type() == 'op':
-                self.token = self.next_token()
+                self.next_token()
                 if self.condition():
-                    self.token = self.next_token()
+                    self.next_token()
                     if self.token.get_type() == 'cp':
-                        self.token = self.next_token()
+                        self.next_token()
                         if self.token.get_type() == 'open_curly_braces':
-                            self.token = self.next_token()
+                            self.expecting += 1
+                            self.next_token()
                             if self.all():
-                                self.token = self.next_token()
+                                self.next_token()
                                 if self.token.get_type() == 'close_curly_braces':
+                                    self.expecting -= 1
                                     return True
                                 else:
                                     self.previous_token()
@@ -235,7 +249,22 @@ class SyntaticAnalysis():
         return False
     
     def all(self):
-        expecting = 1
+        while (self.expecting > 0):
+            self.next_token()
+
+            if self.if_statement():
+                print(f"Success: if.")
+                # TODO: buildar ast
+            elif self.attr_expression():
+                print(f"Success: attr_expression.")
+                # TODO: buildar ast
+            elif self.init_expression():
+                print(f"Success: init_expression.")
+                # TODO: buildar ast
+            # TODO: adicionar while, for, else, else if, output(), input()
+            else:
+                print(f"ERROR: No matching rule for {self.token.to_string()}")
+                sys.exit()
 
     def type_(self):
         if self.token.get_type() in ['number_reserved', 'bool_reserved', 'string_reserved']:
@@ -245,11 +274,11 @@ class SyntaticAnalysis():
 
     def attr_expression(self):
         if self.type_():
-            self.token = self.next_token()
+            self.next_token()
             if self.token.get_type() == 'id':
-                self.token = self.next_token()
+                self.next_token()
                 if self.token.get_type() == 'attr':
-                    self.token = self.next_token()
+                    self.next_token()
                     if self.value():
                         return True
                     else:
@@ -263,9 +292,9 @@ class SyntaticAnalysis():
             else:
                 self.previous_token()
         elif self.token.get_type() == 'id':
-            self.token = self.next_token()
+            self.next_token()
             if self.token.get_type() == 'attr':
-                self.token = self.next_token()
+                self.next_token()
                 if self.value():
                     return True
                 else:
@@ -278,7 +307,7 @@ class SyntaticAnalysis():
         
     def init_expression(self):
         if self.type_():
-            self.token = self.next_token()
+            self.next_token()
             if self.token.get_type() == 'id':
                 return True
             else:

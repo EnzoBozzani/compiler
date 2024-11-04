@@ -63,4 +63,7 @@ grammar: dict[str, list[str]] = {
     'type': ['number_reserved', 'bool_reserved', 'string_reserved'],
     'attr_expression': ['type id attr value', 'id attr value'],
     'init_expression': ['type id'],
+    'while': ['while_reserved op condition cp open_curly_braces * close_curly_braces'],
+    'for': ['for_reserved op id in_reserved id cp open_curly_braces * close_curly_braces']
+    #else, else if, output(), input()
 }
