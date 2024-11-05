@@ -1,29 +1,7 @@
-
-number abc = 10.5
-
-number b = abc + 4.5
-
-string str = "oi"
-
-bool condition = true
-
-number highest
-
 if (abc>=b){
     highest = a
-}
-else{
-    highest = b
-}
-
-if (condition){
-    str = "tchau"
+    if (condition){
+        highest = abc
+    }
 }
 
-for (i in oi){
-    abc = abc + 6
-}
-
-while (abc > 10){
-    out()
-}

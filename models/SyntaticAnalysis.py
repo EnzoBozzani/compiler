@@ -42,16 +42,21 @@ class SyntaticAnalysis():
                
 
     def next_token(self):
+        if len(self.tokens) <= 0: return
         if self.previous is not None: self.previous_tokens.insert(0, self.previous)
         self.previous = self.token
         self.token = self.tokens.pop(0)
-        # print(f"TOKEN: {self.token.to_string()}")
-        # print(f"PREVIOUS: {self.previous.to_string()}")
+        if self.token.get_type() == 'open_curly_braces': self.expecting += 1
+        if self.token.get_type() == 'close_curly_braces': self.expecting -= 1
+        print(f"TOKEN: {self.token.to_string()}")
+        print(f"PREVIOUS: {self.previous.to_string()}")
     
     def previous_token(self):
         if self.token is not None: self.tokens.insert(0, self.token)
         self.token = self.previous
         self.previous = self.previous_tokens.pop(0) if len(self.previous_tokens) > 0 else None
+        if self.token.get_type() == 'open_curly_braces': self.expecting -= 1
+        if self.token.get_type() == 'close_curly_braces': self.expecting += 1
     
     def error(self, rule: str):
         self.errors.append(f"Not expected: {self.token}. Rule: {rule}")
@@ -211,14 +216,18 @@ class SyntaticAnalysis():
                     if self.token.get_type() == 'cp':
                         self.next_token()
                         if self.token.get_type() == 'open_curly_braces':
-                            self.expecting += 1
                             self.next_token()
-                            if self.all():
+                            if self.all(self.expecting):
                                 self.next_token()
                                 if self.token.get_type() == 'close_curly_braces':
-                                    self.expecting -= 1
-                                    return True
+                                    self.next_token()
+                                    if self.token.get_type() == 'else_reserved':
+                                        # TODO: ; lógica do else
+                                        pass
+                                    else:
+                                        return True
                                 else:
+                                    self.previous_token()
                                     self.previous_token()
                                     self.previous_token()
                                     self.previous_token()
@@ -231,7 +240,9 @@ class SyntaticAnalysis():
                                 self.previous_token()
                                 self.previous_token()
                                 self.previous_token()
+                                self.previous_token()
                         else:
+                            self.previous_token()
                             self.previous_token()
                             self.previous_token()
                             self.previous_token()
@@ -240,18 +251,19 @@ class SyntaticAnalysis():
                         self.previous_token()
                         self.previous_token()
                         self.previous_token()
+                        self.previous_token()
                 else:
+                    self.previous_token()
                     self.previous_token()
                     self.previous_token()
             else:
                 self.previous_token()
+                self.previous_token()
         
         return False
     
-    def all(self):
-        while (self.expecting > 0):
-            self.next_token()
-
+    def all(self, exp):
+        while (self.expecting > exp):
             if self.if_statement():
                 print(f"Success: if.")
                 # TODO: buildar ast
@@ -265,6 +277,8 @@ class SyntaticAnalysis():
             else:
                 print(f"ERROR: No matching rule for {self.token.to_string()}")
                 sys.exit()
+
+        return True
 
     def type_(self):
         if self.token.get_type() in ['number_reserved', 'bool_reserved', 'string_reserved']:
