@@ -11,8 +11,6 @@ class SyntaticAnalysis():
         self.trees = []
         self.token = self.tokens.pop(0)
 
-        print([t.to_string() for t in self.tokens])
-
         self.run()
 
     def run(self):
@@ -32,14 +30,9 @@ class SyntaticAnalysis():
             elif self.init_expression():
                 print(f"Success: init_expression.")
                 # TODO: buildar ast
-            # TODO:
+            # TODO: for, while, output()
             else:
-                print(f"ERROR: No matching rule for {self.token.to_string()}")
-                sys.exit()
-            
-            if (self.expecting == 0):
-                pass
-                # TODO: lógica pra sair do self.run
+                self.error()
 
                
 
@@ -59,8 +52,9 @@ class SyntaticAnalysis():
         if self.token.get_type() == 'open_curly_braces': self.expecting -= 1
         if self.token.get_type() == 'close_curly_braces': self.expecting += 1
     
-    def error(self, rule: str):
-        self.errors.append(f"Not expected: {self.token}. Rule: {rule}")
+    def error(self):
+        print(f"ERROR: No matching rule for {self.token.get_type()}")
+        sys.exit()
     
     def math_e(self):
         if self.math_t():
@@ -224,7 +218,13 @@ class SyntaticAnalysis():
                                 if self.token.get_type() == 'close_curly_braces':
                                     self.next_token()
                                     if self.token.get_type() == 'else_reserved':
-                                        # TODO: ; lógica do else
+                                        self.next_token()
+                                        if self.token.get_type() == 'open_curly_braces':
+                                            self.next_token()
+                                            if self.all(self.expecting - 1):
+                                                self.next_token()
+                                                if self.token.get_type() == 'close_curly_braces':
+                                                    return True
                                         pass
                                     else:
                                         if len(self.tokens) > 0: self.previous_token()
@@ -278,8 +278,7 @@ class SyntaticAnalysis():
                 # TODO: buildar ast
             # TODO: adicionar while, for, else, else if, output(), input()
             else:
-                print(f"ERROR: No matching rule for {self.token.to_string()}")
-                sys.exit()
+                self.error()
 
         return True
 
@@ -323,7 +322,6 @@ class SyntaticAnalysis():
         return False
         
     def init_expression(self):
-        print(self.token.to_string())
         if self.type_():
             self.next_token()
             if self.token.get_type() == 'id':

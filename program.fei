@@ -18,5 +18,7 @@ if (abc>=b){
     if (condition){
         highest = abc
     }
+} else {
+    highest = abc
 }
 

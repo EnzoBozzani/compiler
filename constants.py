@@ -58,12 +58,14 @@ grammar: dict[str, list[str]] = {
     'condition': ['value condition*'],
     'condition*': ['comparison_operator value', None],
     'comparison_operator': ['gt', 'equal', 'gte', 'lte', 'lt'],
-    'if': ['if_reserved op condition cp open_curly_braces * close_curly_braces'],
+    'if': ['if_reserved op condition cp open_curly_braces * close_curly_braces else'],
+    'else': ['else*', None],
+    'else*': ['else_reserved open_curly_braces * close_curly_braces'],
     '*': [None],
     'type': ['number_reserved', 'bool_reserved', 'string_reserved'],
     'attr_expression': ['type id attr value', 'id attr value'],
     'init_expression': ['type id'],
     'while': ['while_reserved op condition cp open_curly_braces * close_curly_braces'],
     'for': ['for_reserved op id in_reserved id cp open_curly_braces * close_curly_braces']
-    #else, else if, output(), input()
+    # TODO: else if, output(), input()
 }
