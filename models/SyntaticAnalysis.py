@@ -10,6 +10,7 @@ class SyntaticAnalysis():
         self.previous = None
         self.trees = []
         self.token = self.tokens.pop(0)
+        self.first_exec = True
 
         self.run()
 
@@ -21,26 +22,28 @@ class SyntaticAnalysis():
                 first = False
             else:
                 self.next_token()
-
             if self.if_statement():
-                print(f"Success: if.")
-                # TODO: buildar ast
+                self.success('if')
             elif self.attr_expression():
-                print(f"Success: attr_expression.")
-                # TODO: buildar ast
+                self.success('attr_expression')
             elif self.init_expression():
-                print(f"Success: init_expression.")
-                # TODO: buildar ast
+                self.success('init_expression')
             elif self.for_statement():
-                print(f"Success: for.")
-                # TODO: buildar ast
-            # TODO: while, output()
+                self.success('for')
+            elif self.while_statement():
+                self.success('while')
+            elif self.output():
+                self.success('output')
             else:
                 self.error()
 
 
     def next_token(self):
-        if len(self.tokens) <= 0: return
+        if len(self.tokens) <= 0:
+            if self.previous is not None: self.previous_tokens.insert(0, self.previous)
+            self.previous = self.token
+            self.token = None
+            return
         if self.previous is not None: self.previous_tokens.insert(0, self.previous)
         self.previous = self.token
         self.token = self.tokens.pop(0)
@@ -58,11 +61,37 @@ class SyntaticAnalysis():
     
 
     def error(self):
-        print(f"ERROR: No matching rule for {self.token.get_type()}")
+        print(f"ERROR: Nenhuma regra encontrada para {self.token.to_string()}")
         sys.exit()
+
+    
+    def success(self, rule: str):
+        print(f"Sucesso: {rule}.")
+        self.build_tree()
+
+    
+    def build_tree(self):
+        tree = []
+        if self.first_exec:
+            for i in range(len(self.previous_tokens) - 1, -1, -1):
+                tree.append(self.previous_tokens[i])
+            tree.append(self.previous)
+            tree.append(self.token)
+            self.first_exec = False
+        else:
+            for i in range(len(self.previous_tokens) - 3, -1, -1):
+                tree.append(self.previous_tokens[i])
+            tree.append(self.previous)
+            tree.append(self.token)
+
+        self.trees.append(tree)
+        self.previous_tokens = []
+        print([t.to_string() for t in tree])
 
 
     def token_in(self, args: list[str]):
+        if self.token is None: return
+
         return self.token.get_type() in args
     
 
@@ -184,7 +213,7 @@ class SyntaticAnalysis():
             else:
                 self.previous_token()
 
-        if self.token_in(['number', 'id', 'string', 'true', 'false']):
+        if self.token_in(['number', 'id', 'string', 'true', 'false', 'input_reserved']):
             return True
         elif self.math_e():
             return True
@@ -245,7 +274,6 @@ class SyntaticAnalysis():
                                                 self.next_token()
                                                 if self.token_in(['close_curly_braces']):
                                                     return True
-                                        pass
                                     else:
                                         if len(self.tokens) > 0: self.previous_token()
                                         return True
@@ -289,18 +317,17 @@ class SyntaticAnalysis():
                 self.next_token()
 
             if self.if_statement():
-                print(f"Success: if.")
-                # TODO: buildar ast
+                self.success('if')
             elif self.attr_expression():
-                print(f"Success: attr_expression.")
-                # TODO: buildar ast
+                self.success('attr_expression')
             elif self.init_expression():
-                print(f"Success: init_expression.")
-                # TODO: buildar ast
+                self.success('init_expression')
             elif self.for_statement():
-                print(f"Success: for.")
-                # TODO: buildar ast
-            # TODO: adicionar while, output(), input()
+                self.success('for')
+            elif self.while_statement():
+                self.success('while')
+            elif self.output():
+                self.success('output')
             else:
                 self.error()
 
@@ -368,7 +395,7 @@ class SyntaticAnalysis():
                     self.next_token()
                     if self.token_in(['in_reserved']):
                         self.next_token()
-                        if self.token_in(['id']):
+                        if self.token_in(['id', 'number']):
                             self.next_token()
                             if self.token_in(['cp']):
                                 self.next_token()
@@ -379,4 +406,30 @@ class SyntaticAnalysis():
                                         if self.token_in(['close_curly_braces']):
                                             return True
                                         
+        return False
+    
+    def while_statement(self):
+        if self.token_in(['while_reserved']):
+            self.next_token()
+            if self.token_in(['op']):
+                self.next_token()
+                if self.condition():
+                    self.next_token()
+                    if self.token_in(['cp']):
+                        self.next_token()
+                        if self.token_in(['open_curly_braces']):
+                            self.next_token()
+                            if self.all(self.expecting - 1):
+                                self.next_token()
+                                if self.token_in(['close_curly_braces']):
+                                    return True
+                                        
+        return False
+    
+    def output(self):
+        if self.token_in(['output_reserved']):
+            self.next_token()
+            if self.value():
+                return True
+        
         return False

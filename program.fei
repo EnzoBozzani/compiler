@@ -22,6 +22,29 @@ if (abc>=b){
     highest = abc
 }
 
-for (abc in b){
+for ( a in 10 ) {
     highest = abc
 }
+
+while ( cnditi ) {
+    highest = abc
+    for ( a in 10 ) {
+        highest = abc
+        for ( a in 10 ) {
+            highest = abc
+        }
+    }
+}
+
+for ( a in 10 ) {
+    highest = abc
+}
+
+for ( a in 10 ) {
+    highest = abc
+}
+
+output oi + 10 - 4.5
+
+string oi = input
+

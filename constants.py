@@ -5,6 +5,8 @@ patterns: list[tuple[str, str]] = [
     ('string_reserved', 'string'),
     ('while_reserved', 'while'),
     ('for_reserved', 'for'),
+    ('output_reserved', 'output'),
+    ('input_reserved', 'input'),
     ('in_reserved', 'in'),
     ('bool_reserved', 'bool'),
     ('true', 'true'),
@@ -25,7 +27,7 @@ patterns: list[tuple[str, str]] = [
     ('mult', '*'),
     ('div', '/'),
     ('number', '(0-9)+ | (0-9)*.(0-9)+'),
-    ('id', '(a-z|A-Z)(a-z|A-Z|0-9|_)*')
+    ('id', '(a-z|A-Z)(a-z|A-Z|0-9|_)*'),
 ]
 
 unique_patterns: list[tuple[str, str]] = [
@@ -42,7 +44,7 @@ unique_patterns: list[tuple[str, str]] = [
     ('equal', '=='),
     ('gte', '>='),
     ('lte', '<='),
-    ('lt', '<'),
+    ('lt', '<')
 ]
 
 grammar: dict[str, list[str]] = {
@@ -54,7 +56,7 @@ grammar: dict[str, list[str]] = {
     'math_n': ['math_d math_n*'],
     'math_n*': ['math_d math_n*', None],
     'math_d': ['id', 'number'],
-    'value': ['number', 'id', 'true', 'false', 'math_e', 'string'],
+    'value': ['number', 'id', 'true', 'false', 'math_e', 'string', 'input'],
     'condition': ['value condition*'],
     'condition*': ['comparison_operator value', None],
     'comparison_operator': ['gt', 'equal', 'gte', 'lte', 'lt'],
@@ -66,6 +68,7 @@ grammar: dict[str, list[str]] = {
     'attr_expression': ['type id attr value', 'id attr value'],
     'init_expression': ['type id'],
     'while': ['while_reserved op condition cp open_curly_braces * close_curly_braces'],
-    'for': ['for_reserved op id in_reserved id cp open_curly_braces * close_curly_braces']
-    # TODO: else if, output(), input()
+    'for': ['for_reserved op id in_reserved id_or_number cp open_curly_braces * close_curly_braces'],
+    'output_statement': ['output_reserved value'],
+    # TODO: input()
 }
