@@ -22,3 +22,6 @@ if (abc>=b){
     highest = abc
 }
 
+for (abc in b){
+    highest = abc
+}

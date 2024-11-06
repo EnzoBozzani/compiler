@@ -13,6 +13,7 @@ class SyntaticAnalysis():
 
         self.run()
 
+
     def run(self):
         first = True
         while len(self.tokens) > 0:
@@ -30,32 +31,41 @@ class SyntaticAnalysis():
             elif self.init_expression():
                 print(f"Success: init_expression.")
                 # TODO: buildar ast
-            # TODO: for, while, output()
+            elif self.for_statement():
+                print(f"Success: for.")
+                # TODO: buildar ast
+            # TODO: while, output()
             else:
                 self.error()
 
-               
 
     def next_token(self):
         if len(self.tokens) <= 0: return
         if self.previous is not None: self.previous_tokens.insert(0, self.previous)
         self.previous = self.token
         self.token = self.tokens.pop(0)
-        if self.token.get_type() == 'open_curly_braces': self.expecting += 1
-        if self.token.get_type() == 'close_curly_braces': self.expecting -= 1
+        if self.token_in(['open_curly_braces']): self.expecting += 1
+        if self.token_in(['close_curly_braces']): self.expecting -= 1
         # print(f"TOKEN: {self.token.to_string()}")
     
+
     def previous_token(self):
         if self.token is not None: self.tokens.insert(0, self.token)
         self.token = self.previous
         self.previous = self.previous_tokens.pop(0) if len(self.previous_tokens) > 0 else None
-        if self.token.get_type() == 'open_curly_braces': self.expecting -= 1
-        if self.token.get_type() == 'close_curly_braces': self.expecting += 1
+        if self.token_in(['open_curly_braces']): self.expecting -= 1
+        if self.token_in(['close_curly_braces']): self.expecting += 1
     
+
     def error(self):
         print(f"ERROR: No matching rule for {self.token.get_type()}")
         sys.exit()
+
+
+    def token_in(self, args: list[str]):
+        return self.token.get_type() in args
     
+
     def math_e(self):
         if self.math_t():
             self.next_token()
@@ -64,11 +74,11 @@ class SyntaticAnalysis():
             else:
                 self.previous_token()
         
-    
         return False
 
+
     def math_e_(self):
-        if self.token.get_type() in ['add', 'sub']:
+        if self.token_in(['add', 'sub']):
             self.next_token()
             if self.math_t():
                 self.next_token()
@@ -83,6 +93,7 @@ class SyntaticAnalysis():
         self.previous_token()
         return True
 
+
     def math_t(self):
         if self.math_f():
             self.next_token()
@@ -93,8 +104,9 @@ class SyntaticAnalysis():
         
         return False
 
+
     def math_t_(self):
-        if self.token.get_type() in ['mult', 'div']:
+        if self.token_in(['mult', 'div']):
             self.next_token()
             if self.math_f():
                 self.next_token()
@@ -109,12 +121,13 @@ class SyntaticAnalysis():
         self.previous_token()
         return True
     
+
     def math_f(self):
-        if self.token.get_type() == 'op':
+        if self.token_in(['op']):
             self.next_token()
             if self.math_e():
                 self.next_token()
-                if self.token.get_type() == 'cp':
+                if self.token_in(['cp']):
                     return True
                 else: 
                     self.previous_token()
@@ -125,9 +138,9 @@ class SyntaticAnalysis():
         elif self.math_n():
             return True
 
-
         return False
     
+
     def math_n(self):
         if self.math_d():
             self.next_token()
@@ -138,6 +151,7 @@ class SyntaticAnalysis():
         
         return False
     
+
     def math_n_(self):
         if self.math_d():
             self.next_token()
@@ -149,16 +163,18 @@ class SyntaticAnalysis():
         self.previous_token()
         return True
     
+
     def math_d(self):
-        if self.token.get_type() in ['id', 'number']:
+        if self.token_in(['id', 'number']):
             return True
         
         return False
     
+
     def value(self):
-        if self.token.get_type() in ['number', 'id']:
+        if self.token_in(['id', 'number']):
             self.next_token()
-            if self.token.get_type() in ['add', 'sub', 'div', 'mult']:
+            if self.token_in(['add', 'sub', 'div', 'mult']):
                 self.next_token()
                 if self.math_e():
                     return True
@@ -168,12 +184,13 @@ class SyntaticAnalysis():
             else:
                 self.previous_token()
 
-        if self.token.get_type() in ['number', 'id', 'string', 'true', 'false']:
+        if self.token_in(['number', 'id', 'string', 'true', 'false']):
             return True
         elif self.math_e():
             return True
         
         return False
+
 
     def condition(self):
         if self.value():
@@ -185,6 +202,7 @@ class SyntaticAnalysis():
         
         return False
     
+
     def condition_(self):
         if self.comparison_operator():
             self.next_token()
@@ -196,34 +214,36 @@ class SyntaticAnalysis():
         self.previous_token()
         return True
     
+
     def comparison_operator(self):
-        if self.token.get_type() in ['gt', 'equal', 'gte', 'lte', 'lt']:
+        if self.token_in(['gt', 'equal', 'gte', 'lte', 'lt']):
             return True
         
         return False
     
+
     def if_statement(self):
-        if self.token.get_type() == 'if_reserved':
+        if self.token_in(['if_reserved']):
             self.next_token()
-            if self.token.get_type() == 'op':
+            if self.token_in(['op']):
                 self.next_token()
                 if self.condition():
                     self.next_token()
-                    if self.token.get_type() == 'cp':
+                    if self.token_in(['cp']):
                         self.next_token()
-                        if self.token.get_type() == 'open_curly_braces':
+                        if self.token_in(['open_curly_braces']):
                             self.next_token()
                             if self.all(self.expecting - 1):
                                 self.next_token()
-                                if self.token.get_type() == 'close_curly_braces':
+                                if self.token_in(['close_curly_braces']):
                                     self.next_token()
-                                    if self.token.get_type() == 'else_reserved':
+                                    if self.token_in(['else_reserved']):
                                         self.next_token()
-                                        if self.token.get_type() == 'open_curly_braces':
+                                        if self.token_in(['open_curly_braces']):
                                             self.next_token()
                                             if self.all(self.expecting - 1):
                                                 self.next_token()
-                                                if self.token.get_type() == 'close_curly_braces':
+                                                if self.token_in(['close_curly_braces']):
                                                     return True
                                         pass
                                     else:
@@ -256,9 +276,10 @@ class SyntaticAnalysis():
                     self.previous_token()
             else:
                 self.previous_token()
-        
+
         return False
     
+
     def all(self, exp):
         first = True
         while (self.expecting > exp):
@@ -276,24 +297,29 @@ class SyntaticAnalysis():
             elif self.init_expression():
                 print(f"Success: init_expression.")
                 # TODO: buildar ast
-            # TODO: adicionar while, for, else, else if, output(), input()
+            elif self.for_statement():
+                print(f"Success: for.")
+                # TODO: buildar ast
+            # TODO: adicionar while, output(), input()
             else:
                 self.error()
 
         return True
 
+
     def type_(self):
-        if self.token.get_type() in ['number_reserved', 'bool_reserved', 'string_reserved']:
+        if self.token_in(['number_reserved', 'bool_reserved', 'string_reserved']):
             return True
 
         return False
 
+
     def attr_expression(self):
         if self.type_():
             self.next_token()
-            if self.token.get_type() == 'id':
+            if self.token_in(['id']):
                 self.next_token()
-                if self.token.get_type() == 'attr':
+                if self.token_in(['attr']):
                     self.next_token()
                     if self.value():
                         return True
@@ -307,9 +333,9 @@ class SyntaticAnalysis():
         
             else:
                 self.previous_token()
-        elif self.token.get_type() == 'id':
+        elif self.token_in(['id']):
             self.next_token()
-            if self.token.get_type() == 'attr':
+            if self.token_in(['attr']):
                 self.next_token()
                 if self.value():
                     return True
@@ -321,12 +347,36 @@ class SyntaticAnalysis():
     
         return False
         
+
     def init_expression(self):
         if self.type_():
             self.next_token()
-            if self.token.get_type() == 'id':
+            if self.token_in(['id']):
                 return True
             else:
                 self.previous_token()
         
+        return False
+    
+
+    def for_statement(self):
+        if self.token_in(['for_reserved']):
+            self.next_token()
+            if self.token_in(['op']):
+                self.next_token()
+                if self.token_in(['id']):
+                    self.next_token()
+                    if self.token_in(['in_reserved']):
+                        self.next_token()
+                        if self.token_in(['id']):
+                            self.next_token()
+                            if self.token_in(['cp']):
+                                self.next_token()
+                                if self.token_in(['open_curly_braces']):
+                                    self.next_token()
+                                    if self.all(self.expecting - 1):
+                                        self.next_token()
+                                        if self.token_in(['close_curly_braces']):
+                                            return True
+                                        
         return False
