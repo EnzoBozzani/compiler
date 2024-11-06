@@ -1,6 +1,6 @@
 import sys
 
-from models import Token
+from models import Token, Tree
 
 class SyntaticAnalysis():
     def __init__(self, tokens: list[Token]):
@@ -8,7 +8,7 @@ class SyntaticAnalysis():
         self.previous_tokens = []
         self.expecting = 0
         self.previous = None
-        self.trees = []
+        self.trees: list[Tree] = []
         self.token = self.tokens.pop(0)
         self.first_exec = True
 
@@ -66,27 +66,25 @@ class SyntaticAnalysis():
 
     
     def success(self, rule: str):
-        print(f"Sucesso: {rule}.")
-        self.build_tree()
+        self.build_tree(rule)
 
     
-    def build_tree(self):
-        tree = []
+    def build_tree(self, rule):
+        tokens = []
         if self.first_exec:
             for i in range(len(self.previous_tokens) - 1, -1, -1):
-                tree.append(self.previous_tokens[i])
-            tree.append(self.previous)
-            tree.append(self.token)
+                tokens.append(self.previous_tokens[i])
+            tokens.append(self.previous)
+            tokens.append(self.token)
             self.first_exec = False
         else:
             for i in range(len(self.previous_tokens) - 3, -1, -1):
-                tree.append(self.previous_tokens[i])
-            tree.append(self.previous)
-            tree.append(self.token)
+                tokens.append(self.previous_tokens[i])
+            tokens.append(self.previous)
+            tokens.append(self.token)
 
-        self.trees.append(tree)
+        self.trees.append(Tree(rule=rule, tokens=tokens))
         self.previous_tokens = []
-        print([t.to_string() for t in tree])
 
 
     def token_in(self, args: list[str]):

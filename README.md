@@ -12,4 +12,4 @@
 
 ## Tasks:
 
--   Método que verifica se token pertence a gramática x
+-   Buildar árvores (se tá aninhado, colocar dentro)

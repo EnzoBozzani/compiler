@@ -12,6 +12,9 @@ def main() -> None:
     lexical_analyzer = LexicalAnalysis(sys.argv[1])
 
     syntatic_analyzer = SyntaticAnalysis(lexical_analyzer.tokens)
+
+    for tree in syntatic_analyzer.trees:
+        tree.to_string()
         
 
 if __name__ == '__main__':
