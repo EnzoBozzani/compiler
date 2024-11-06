@@ -9,9 +9,9 @@ def main() -> None:
         sys.exit()
 
 
-    lexical = LexicalAnalysis(sys.argv[1])
+    lexical_analyzer = LexicalAnalysis(sys.argv[1])
 
-    syntatic_analyzer = SyntaticAnalysis(lexical.tokens)
+    syntatic_analyzer = SyntaticAnalysis(lexical_analyzer.tokens)
         
 
 if __name__ == '__main__':

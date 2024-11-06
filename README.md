@@ -1,13 +1,13 @@
 ## Run:
 
 ```bash
-./run your_file.fei
+./fei your_file.fei
 ```
 
 ## Example:
 
 ```bash
-./run program.fei
+./fei program.fei
 ```
 
 ## Tasks:

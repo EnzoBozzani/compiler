@@ -1,4 +1,19 @@
+number abc = 5
+
+number b = abc + 10
+
+bool condition = true
+
+number highest
+
 if (abc>=b){
+    highest = a
+    if (condition){
+        highest = abc
+        if (condition){
+            highest = abc
+        }
+    }
     highest = a
     if (condition){
         highest = abc

@@ -9,12 +9,14 @@ class SyntaticAnalysis():
         self.expecting = 0
         self.previous = None
         self.trees = []
+        self.token = self.tokens.pop(0)
+
+        print([t.to_string() for t in self.tokens])
 
         self.run()
 
     def run(self):
         first = True
-        self.token = self.tokens.pop(0)
         while len(self.tokens) > 0:
             if first: 
                 first = False
@@ -48,8 +50,7 @@ class SyntaticAnalysis():
         self.token = self.tokens.pop(0)
         if self.token.get_type() == 'open_curly_braces': self.expecting += 1
         if self.token.get_type() == 'close_curly_braces': self.expecting -= 1
-        print(f"TOKEN: {self.token.to_string()}")
-        print(f"PREVIOUS: {self.previous.to_string()}")
+        # print(f"TOKEN: {self.token.to_string()}")
     
     def previous_token(self):
         if self.token is not None: self.tokens.insert(0, self.token)
@@ -197,7 +198,8 @@ class SyntaticAnalysis():
                 return True
             else:
                 self.previous_token()
-        
+
+        self.previous_token()
         return True
     
     def comparison_operator(self):
@@ -217,7 +219,7 @@ class SyntaticAnalysis():
                         self.next_token()
                         if self.token.get_type() == 'open_curly_braces':
                             self.next_token()
-                            if self.all(self.expecting):
+                            if self.all(self.expecting - 1):
                                 self.next_token()
                                 if self.token.get_type() == 'close_curly_braces':
                                     self.next_token()
@@ -225,9 +227,9 @@ class SyntaticAnalysis():
                                         # TODO: ; lógica do else
                                         pass
                                     else:
+                                        if len(self.tokens) > 0: self.previous_token()
                                         return True
                                 else:
-                                    self.previous_token()
                                     self.previous_token()
                                     self.previous_token()
                                     self.previous_token()
@@ -240,9 +242,7 @@ class SyntaticAnalysis():
                                 self.previous_token()
                                 self.previous_token()
                                 self.previous_token()
-                                self.previous_token()
                         else:
-                            self.previous_token()
                             self.previous_token()
                             self.previous_token()
                             self.previous_token()
@@ -251,19 +251,22 @@ class SyntaticAnalysis():
                         self.previous_token()
                         self.previous_token()
                         self.previous_token()
-                        self.previous_token()
                 else:
                     self.previous_token()
                     self.previous_token()
-                    self.previous_token()
             else:
-                self.previous_token()
                 self.previous_token()
         
         return False
     
     def all(self, exp):
+        first = True
         while (self.expecting > exp):
+            if first: 
+                first = False
+            else:
+                self.next_token()
+
             if self.if_statement():
                 print(f"Success: if.")
                 # TODO: buildar ast
@@ -316,10 +319,11 @@ class SyntaticAnalysis():
                     self.previous_token()
             else:
                 self.previous_token()
-        
+    
         return False
         
     def init_expression(self):
+        print(self.token.to_string())
         if self.type_():
             self.next_token()
             if self.token.get_type() == 'id':
