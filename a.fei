@@ -1,0 +1,6 @@
+if (condition){
+    a = b
+    if (condition){
+        a = b
+    }
+}

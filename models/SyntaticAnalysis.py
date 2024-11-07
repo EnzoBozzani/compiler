@@ -1,6 +1,6 @@
 import sys
 
-from models import Token, Tree
+from models import Token, Tree, Node
 
 class SyntaticAnalysis():
     def __init__(self, tokens: list[Token]):
@@ -8,10 +8,12 @@ class SyntaticAnalysis():
         self.previous_tokens = []
         self.expecting = 0
         self.previous = None
-        self.trees: list[Tree] = []
-        self.internal_trees: list[Tree] = []
+        self.internal_blocks = []
         self.token = self.tokens.pop(0)
         self.first_exec = True
+
+        self.root = Node("program")
+        self.tree = Tree(self.root)
 
         self.run()
 
@@ -23,18 +25,24 @@ class SyntaticAnalysis():
                 first = False
             else:
                 self.next_token()
-            if self.if_statement():
-                self.build_tree('if')
-            elif self.attr_expression():
-                self.build_tree('attr_expression')
-            elif self.init_expression():
-                self.build_tree('init_expression')
-            elif self.for_statement():
-                self.build_tree('for')
-            elif self.while_statement():
-                self.build_tree('while')
-            elif self.output():
-                self.build_tree('output')
+            if self.if_statement(self.root):
+                # self.build_tree('if')
+                continue
+            elif self.attr_expression(self.root):
+                # self.build_tree('attr_expression')
+                continue
+            elif self.init_expression(self.root):
+                # self.build_tree('init_expression')
+                continue
+            elif self.for_statement(self.root):
+                # self.build_tree('for')
+                continue
+            elif self.while_statement(self.root):
+                # self.build_tree('while')
+                continue
+            elif self.output(self.root):
+                # self.build_tree('output')
+                continue
             else:
                 self.error()
 
@@ -48,16 +56,16 @@ class SyntaticAnalysis():
         if self.previous is not None: self.previous_tokens.insert(0, self.previous)
         self.previous = self.token
         self.token = self.tokens.pop(0)
-        if self.token_in(['open_curly_braces']): self.expecting += 1
-        if self.token_in(['close_curly_braces']): self.expecting -= 1
+        if self.token_in(['open_curly_braces'], None): self.expecting += 1
+        if self.token_in(['close_curly_braces'], None): self.expecting -= 1
     
 
     def previous_token(self):
         if self.token is not None: self.tokens.insert(0, self.token)
         self.token = self.previous
         self.previous = self.previous_tokens.pop(0) if len(self.previous_tokens) > 0 else None
-        if self.token_in(['open_curly_braces']): self.expecting -= 1
-        if self.token_in(['close_curly_braces']): self.expecting += 1
+        if self.token_in(['open_curly_braces'], None): self.expecting -= 1
+        if self.token_in(['close_curly_braces'], None): self.expecting += 1
     
 
     def error(self):
@@ -82,10 +90,17 @@ class SyntaticAnalysis():
         self.previous_tokens = []
 
 
-    def token_in(self, args: list[str]):
+    def token_in(self, args: list[str], node: Node | None):
         if self.token is None: return
 
-        return self.token.get_type() in args
+        if node is None:
+            return self.token.get_type() in args
+
+        if self.token.get_type() in args:
+            node.add_node(Node(name=self.token.get_type()))
+            return True
+
+        return False
     
 
     def math_e(self):
@@ -193,20 +208,23 @@ class SyntaticAnalysis():
         return False
     
 
-    def value(self):
-        if self.token_in(['id', 'number']):
+    def value(self, root: Node):
+        node = Node("value")
+        root.add_node(node)
+        if self.token_in(['id', 'number'], node):
             self.next_token()
-            if self.token_in(['add', 'sub', 'div', 'mult']):
+            if self.token_in(['add', 'sub', 'div', 'mult'], node):
                 self.next_token()
-                if self.math_e():
+                if self.math_e(node):
                     return True
                 else:
                     self.previous_token()
                     self.previous_token()
             else:
                 self.previous_token()
+                return True
 
-        if self.token_in(['number', 'id', 'string', 'true', 'false', 'input_reserved']):
+        if self.token_in(['string', 'true', 'false', 'input_reserved'], node):
             return True
         elif self.math_e():
             return True
@@ -214,10 +232,12 @@ class SyntaticAnalysis():
         return False
 
 
-    def condition(self):
-        if self.value():
+    def condition(self, root: Node):
+        node = Node("condition")
+        root.add_node(node)
+        if self.value(node):
             self.next_token()
-            if self.condition_():
+            if self.condition_(node):
                 return True
             else:
                 self.previous_token()
@@ -225,10 +245,12 @@ class SyntaticAnalysis():
         return False
     
 
-    def condition_(self):
-        if self.comparison_operator():
+    def condition_(self, root: Node):
+        node = Node("condition'")
+        root.add_node(node)
+        if self.comparison_operator(node):
             self.next_token()
-            if self.value():
+            if self.value(node):
                 return True
             else:
                 self.previous_token()
@@ -237,35 +259,39 @@ class SyntaticAnalysis():
         return True
     
 
-    def comparison_operator(self):
-        if self.token_in(['gt', 'equal', 'gte', 'lte', 'lt']):
+    def comparison_operator(self, root: Node):
+        node = Node("comparison_operator")
+        root.add_node(node)
+        if self.token_in(['gt', 'equal', 'gte', 'lte', 'lt'], node):
             return True
         
         return False
     
 
-    def if_statement(self):
-        if self.token_in(['if_reserved']):
+    def if_statement(self, root: Node):
+        node = Node("if")
+        root.add_node(node)
+        if self.token_in(['if_reserved'], node):
             self.next_token()
-            if self.token_in(['op']):
+            if self.token_in(['op'], node):
                 self.next_token()
-                if self.condition():
+                if self.condition(node):
                     self.next_token()
-                    if self.token_in(['cp']):
+                    if self.token_in(['cp'], node):
                         self.next_token()
-                        if self.token_in(['open_curly_braces']):
+                        if self.token_in(['open_curly_braces'], node):
                             self.next_token()
-                            if self.all(self.expecting - 1):
+                            if self.all(self.expecting - 1, node):
                                 self.next_token()
-                                if self.token_in(['close_curly_braces']):
+                                if self.token_in(['close_curly_braces'], node):
                                     self.next_token()
-                                    if self.token_in(['else_reserved']):
+                                    if self.token_in(['else_reserved'], node):
                                         self.next_token()
-                                        if self.token_in(['open_curly_braces']):
+                                        if self.token_in(['open_curly_braces'], node):
                                             self.next_token()
-                                            if self.all(self.expecting - 1):
+                                            if self.all(self.expecting - 1, node):
                                                 self.next_token()
-                                                if self.token_in(['close_curly_braces']):
+                                                if self.token_in(['close_curly_braces'], node):
                                                     return True
                                     else:
                                         if len(self.tokens) > 0: self.previous_token()
@@ -301,13 +327,9 @@ class SyntaticAnalysis():
         return False
     
 
-    def all(self, exp):
-        code_block = [self.token]
-        for t in self.tokens:
-            code_block.append(t)
-        
-        start_len = len(self.tokens)
-
+    def all(self, exp, root: Node):
+        node = Node("all")
+        root.add_node(node)
         first = True
         while (self.expecting > exp):
             if first: 
@@ -315,42 +337,43 @@ class SyntaticAnalysis():
             else:
                 self.next_token()
 
-            if self.if_statement():
+            if self.if_statement(node):
                 continue
-            elif self.attr_expression():
+            elif self.attr_expression(node):
                 continue
-            elif self.init_expression():
+            elif self.init_expression(node):
                 continue
-            elif self.for_statement():
+            elif self.for_statement(node):
                 continue
-            elif self.while_statement():
+            elif self.while_statement(node):
                 continue
-            elif self.output():
+            elif self.output(node):
                 continue
             else:
                 self.error()
 
-        code_block = code_block[:start_len - len(self.tokens) + 1]
-        print([t.to_string() for t in code_block])
-        
         return True
 
 
-    def type_(self):
-        if self.token_in(['number_reserved', 'bool_reserved', 'string_reserved']):
+    def type_(self, root: Node):
+        node = Node("type")
+        root.add_node(node)
+        if self.token_in(['number_reserved', 'bool_reserved', 'string_reserved'], node):
             return True
 
         return False
 
 
-    def attr_expression(self):
-        if self.type_():
+    def attr_expression(self, root: Node):
+        node = Node("attr_expression")
+        root.add_node(node)
+        if self.type_(node):
             self.next_token()
-            if self.token_in(['id']):
+            if self.token_in(['id'], node):
                 self.next_token()
-                if self.token_in(['attr']):
+                if self.token_in(['attr'], node):
                     self.next_token()
-                    if self.value():
+                    if self.value(node):
                         return True
                     else:
                         self.previous_token()
@@ -362,11 +385,11 @@ class SyntaticAnalysis():
         
             else:
                 self.previous_token()
-        elif self.token_in(['id']):
+        elif self.token_in(['id'], node):
             self.next_token()
-            if self.token_in(['attr']):
+            if self.token_in(['attr'], node):
                 self.next_token()
-                if self.value():
+                if self.value(node):
                     return True
                 else:
                     self.previous_token()
@@ -377,10 +400,12 @@ class SyntaticAnalysis():
         return False
         
 
-    def init_expression(self):
-        if self.type_():
+    def init_expression(self, root: Node):
+        node = Node("init_expression")
+        root.add_node(node)
+        if self.type_(node):
             self.next_token()
-            if self.token_in(['id']):
+            if self.token_in(['id'], node):
                 return True
             else:
                 self.previous_token()
@@ -388,50 +413,56 @@ class SyntaticAnalysis():
         return False
     
 
-    def for_statement(self):
-        if self.token_in(['for_reserved']):
+    def for_statement(self, root: Node):
+        node = Node("for")
+        root.add_node(node)
+        if self.token_in(['for_reserved'], node):
             self.next_token()
-            if self.token_in(['op']):
+            if self.token_in(['op'], node):
                 self.next_token()
-                if self.token_in(['id']):
+                if self.token_in(['id'], node):
                     self.next_token()
-                    if self.token_in(['in_reserved']):
+                    if self.token_in(['in_reserved'], node):
                         self.next_token()
-                        if self.token_in(['id', 'number']):
+                        if self.token_in(['id', 'number'], node):
                             self.next_token()
-                            if self.token_in(['cp']):
+                            if self.token_in(['cp'], node):
                                 self.next_token()
-                                if self.token_in(['open_curly_braces']):
+                                if self.token_in(['open_curly_braces'], node):
                                     self.next_token()
-                                    if self.all(self.expecting - 1):
+                                    if self.all(self.expecting - 1, node):
                                         self.next_token()
-                                        if self.token_in(['close_curly_braces']):
+                                        if self.token_in(['close_curly_braces'], node):
                                             return True
                                         
         return False
     
-    def while_statement(self):
-        if self.token_in(['while_reserved']):
+    def while_statement(self, root: Node):
+        node = Node("while")
+        root.add_node(node)
+        if self.token_in(['while_reserved'], node):
             self.next_token()
-            if self.token_in(['op']):
+            if self.token_in(['op'], node):
                 self.next_token()
                 if self.condition():
                     self.next_token()
-                    if self.token_in(['cp']):
+                    if self.token_in(['cp'], node):
                         self.next_token()
-                        if self.token_in(['open_curly_braces']):
+                        if self.token_in(['open_curly_braces'], node):
                             self.next_token()
                             if self.all(self.expecting - 1):
                                 self.next_token()
-                                if self.token_in(['close_curly_braces']):
+                                if self.token_in(['close_curly_braces'], node):
                                     return True
                                         
         return False
     
-    def output(self):
-        if self.token_in(['output_reserved']):
+    def output(self, root: Node):
+        node = Node("while")
+        root.add_node(node)
+        if self.token_in(['output_reserved'], node):
             self.next_token()
-            if self.value():
+            if self.value(node):
                 return True
         
         return False

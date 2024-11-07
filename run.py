@@ -1,6 +1,6 @@
 import sys
 
-from models import SyntaticAnalysis, LexicalAnalysis
+from models import SyntaticAnalysis, LexicalAnalysis, SemanticAnalysis
 
 
 def main() -> None:
@@ -13,8 +13,9 @@ def main() -> None:
 
     syntatic_analyzer = SyntaticAnalysis(lexical_analyzer.tokens)
 
-    for tree in syntatic_analyzer.trees:
-        tree.to_string()
+    syntatic_analyzer.tree.print_tree()
+
+    # semantic_analyzer = SemanticAnalysis(syntatic_analyzer.trees)
         
 
 if __name__ == '__main__':
