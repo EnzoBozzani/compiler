@@ -1,16 +1,13 @@
 from models import Token
 
 class Tree():
-    def __init__(self, rule: str, tokens: list[Token]):
+    def __init__(self, rule: str, nodes: list[Token]):
         self.type = rule
-        self.tokens = [t for t in tokens]
+        self.nodes = [t for t in nodes]
 
     def to_string(self):
         print(self.type)
-        for t in self.tokens:
-            print(t.get_lexem(), end=' ')
-        print()
-        for t in self.tokens:
-            print(t.get_type(), end=' ')
+        for t in self.nodes:
+            print(t.to_string(), end=' ')
         print()
         print()

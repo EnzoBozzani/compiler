@@ -9,6 +9,7 @@ class SyntaticAnalysis():
         self.expecting = 0
         self.previous = None
         self.trees: list[Tree] = []
+        self.internal_trees: list[Tree] = []
         self.token = self.tokens.pop(0)
         self.first_exec = True
 
@@ -23,17 +24,17 @@ class SyntaticAnalysis():
             else:
                 self.next_token()
             if self.if_statement():
-                self.success('if')
+                self.build_tree('if')
             elif self.attr_expression():
-                self.success('attr_expression')
+                self.build_tree('attr_expression')
             elif self.init_expression():
-                self.success('init_expression')
+                self.build_tree('init_expression')
             elif self.for_statement():
-                self.success('for')
+                self.build_tree('for')
             elif self.while_statement():
-                self.success('while')
+                self.build_tree('while')
             elif self.output():
-                self.success('output')
+                self.build_tree('output')
             else:
                 self.error()
 
@@ -49,7 +50,6 @@ class SyntaticAnalysis():
         self.token = self.tokens.pop(0)
         if self.token_in(['open_curly_braces']): self.expecting += 1
         if self.token_in(['close_curly_braces']): self.expecting -= 1
-        # print(f"TOKEN: {self.token.to_string()}")
     
 
     def previous_token(self):
@@ -63,11 +63,6 @@ class SyntaticAnalysis():
     def error(self):
         print(f"ERROR: Nenhuma regra encontrada para {self.token.to_string()}")
         sys.exit()
-
-    
-    def success(self, rule: str):
-        self.build_tree(rule)
-
     
     def build_tree(self, rule):
         tokens = []
@@ -83,7 +78,7 @@ class SyntaticAnalysis():
             tokens.append(self.previous)
             tokens.append(self.token)
 
-        self.trees.append(Tree(rule=rule, tokens=tokens))
+        self.trees.append(Tree(rule=rule, nodes=tokens))
         self.previous_tokens = []
 
 
@@ -307,6 +302,12 @@ class SyntaticAnalysis():
     
 
     def all(self, exp):
+        code_block = [self.token]
+        for t in self.tokens:
+            code_block.append(t)
+        
+        start_len = len(self.tokens)
+
         first = True
         while (self.expecting > exp):
             if first: 
@@ -315,20 +316,23 @@ class SyntaticAnalysis():
                 self.next_token()
 
             if self.if_statement():
-                self.success('if')
+                continue
             elif self.attr_expression():
-                self.success('attr_expression')
+                continue
             elif self.init_expression():
-                self.success('init_expression')
+                continue
             elif self.for_statement():
-                self.success('for')
+                continue
             elif self.while_statement():
-                self.success('while')
+                continue
             elif self.output():
-                self.success('output')
+                continue
             else:
                 self.error()
 
+        code_block = code_block[:start_len - len(self.tokens) + 1]
+        print([t.to_string() for t in code_block])
+        
         return True
 
 
