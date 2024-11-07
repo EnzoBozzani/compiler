@@ -103,10 +103,12 @@ class SyntaticAnalysis():
         return False
     
 
-    def math_e(self):
-        if self.math_t():
+    def math_e(self, root: Node):
+        node = Node("math_e")
+        if self.math_t(node):
             self.next_token()
-            if self.math_e_():
+            if self.math_e_(node):
+                root.add_node(node)
                 return True
             else:
                 self.previous_token()
@@ -114,12 +116,14 @@ class SyntaticAnalysis():
         return False
 
 
-    def math_e_(self):
-        if self.token_in(['add', 'sub']):
+    def math_e_(self, root: Node):
+        node = Node("math_e'")
+        if self.token_in(['add', 'sub'], node):
             self.next_token()
-            if self.math_t():
+            if self.math_t(node):
                 self.next_token()
-                if self.math_e_():
+                if self.math_e_(node):
+                    root.add_node(node)
                     return True
                 else:
                     self.previous_token()
@@ -128,13 +132,16 @@ class SyntaticAnalysis():
                 self.previous_token()
         
         self.previous_token()
+        root.add_node(node)
         return True
 
 
-    def math_t(self):
-        if self.math_f():
+    def math_t(self, root: Node):
+        node = Node("math_t")
+        if self.math_f(node):
             self.next_token()
-            if self.math_t_():
+            if self.math_t_(node):
+                root.add_node(node)
                 return True
             else:
                 self.previous_token()
@@ -142,12 +149,14 @@ class SyntaticAnalysis():
         return False
 
 
-    def math_t_(self):
-        if self.token_in(['mult', 'div']):
+    def math_t_(self, root: Node):
+        node = Node("math_t'")
+        if self.token_in(['mult', 'div'], node):
             self.next_token()
-            if self.math_f():
+            if self.math_f(node):
                 self.next_token()
-                if self.math_t_():
+                if self.math_t_(node):
+                    root.add_node(node)
                     return True
                 else: 
                     self.previous_token()
@@ -156,15 +165,18 @@ class SyntaticAnalysis():
                 self.previous_token()
         
         self.previous_token()
+        root.add_node(node)
         return True
     
 
-    def math_f(self):
-        if self.token_in(['op']):
+    def math_f(self, root: Node):
+        node = Node("math_f")
+        if self.token_in(['op'], node):
             self.next_token()
-            if self.math_e():
+            if self.math_e(node):
                 self.next_token()
-                if self.token_in(['cp']):
+                if self.token_in(['cp'], node):
+                    root.add_node(node)
                     return True
                 else: 
                     self.previous_token()
@@ -172,16 +184,19 @@ class SyntaticAnalysis():
             else:
                 self.previous_token()
 
-        elif self.math_n():
+        elif self.math_n(node):
+            root.add_node(node)
             return True
 
         return False
     
 
-    def math_n(self):
-        if self.math_d():
+    def math_n(self, root: Node):
+        node = Node("math_n")
+        if self.math_d(node):
             self.next_token()
-            if self.math_n_():
+            if self.math_n_(node):
+                root.add_node(node)
                 return True
             else:
                 self.previous_token()
@@ -189,20 +204,25 @@ class SyntaticAnalysis():
         return False
     
 
-    def math_n_(self):
-        if self.math_d():
+    def math_n_(self, root: Node):
+        node = Node("math_n'")
+        if self.math_d(node):
             self.next_token()
-            if self.math_n_():
+            if self.math_n_(node):
+                root.add_node(node)
                 return True
             else: 
                 self.previous_token()
         
         self.previous_token()
+        root.add_node(node)
         return True
     
 
-    def math_d(self):
-        if self.token_in(['id', 'number']):
+    def math_d(self, root: Node):
+        node = Node("math_d")
+        if self.token_in(['id', 'number'], node):
+            root.add_node(node)
             return True
         
         return False
@@ -210,23 +230,26 @@ class SyntaticAnalysis():
 
     def value(self, root: Node):
         node = Node("value")
-        root.add_node(node)
         if self.token_in(['id', 'number'], node):
             self.next_token()
             if self.token_in(['add', 'sub', 'div', 'mult'], node):
                 self.next_token()
                 if self.math_e(node):
+                    root.add_node(node)
                     return True
                 else:
                     self.previous_token()
                     self.previous_token()
             else:
                 self.previous_token()
+                root.add_node(node)
                 return True
 
         if self.token_in(['string', 'true', 'false', 'input_reserved'], node):
+            root.add_node(node)
             return True
         elif self.math_e():
+            root.add_node(node)
             return True
         
         return False
@@ -234,10 +257,10 @@ class SyntaticAnalysis():
 
     def condition(self, root: Node):
         node = Node("condition")
-        root.add_node(node)
         if self.value(node):
             self.next_token()
             if self.condition_(node):
+                root.add_node(node)
                 return True
             else:
                 self.previous_token()
@@ -247,22 +270,23 @@ class SyntaticAnalysis():
 
     def condition_(self, root: Node):
         node = Node("condition'")
-        root.add_node(node)
         if self.comparison_operator(node):
             self.next_token()
             if self.value(node):
+                root.add_node(node)
                 return True
             else:
                 self.previous_token()
 
         self.previous_token()
+        root.add_node(node)
         return True
     
 
     def comparison_operator(self, root: Node):
         node = Node("comparison_operator")
-        root.add_node(node)
         if self.token_in(['gt', 'equal', 'gte', 'lte', 'lt'], node):
+            root.add_node(node)
             return True
         
         return False
@@ -270,7 +294,6 @@ class SyntaticAnalysis():
 
     def if_statement(self, root: Node):
         node = Node("if")
-        root.add_node(node)
         if self.token_in(['if_reserved'], node):
             self.next_token()
             if self.token_in(['op'], node):
@@ -292,9 +315,11 @@ class SyntaticAnalysis():
                                             if self.all(self.expecting - 1, node):
                                                 self.next_token()
                                                 if self.token_in(['close_curly_braces'], node):
+                                                    root.add_node(node)
                                                     return True
                                     else:
                                         if len(self.tokens) > 0: self.previous_token()
+                                        root.add_node(node)
                                         return True
                                 else:
                                     self.previous_token()
@@ -329,7 +354,6 @@ class SyntaticAnalysis():
 
     def all(self, exp, root: Node):
         node = Node("all")
-        root.add_node(node)
         first = True
         while (self.expecting > exp):
             if first: 
@@ -352,13 +376,14 @@ class SyntaticAnalysis():
             else:
                 self.error()
 
+        root.add_node(node)
         return True
 
 
     def type_(self, root: Node):
         node = Node("type")
-        root.add_node(node)
         if self.token_in(['number_reserved', 'bool_reserved', 'string_reserved'], node):
+            root.add_node(node)
             return True
 
         return False
@@ -366,7 +391,6 @@ class SyntaticAnalysis():
 
     def attr_expression(self, root: Node):
         node = Node("attr_expression")
-        root.add_node(node)
         if self.type_(node):
             self.next_token()
             if self.token_in(['id'], node):
@@ -374,6 +398,7 @@ class SyntaticAnalysis():
                 if self.token_in(['attr'], node):
                     self.next_token()
                     if self.value(node):
+                        root.add_node(node)
                         return True
                     else:
                         self.previous_token()
@@ -390,6 +415,7 @@ class SyntaticAnalysis():
             if self.token_in(['attr'], node):
                 self.next_token()
                 if self.value(node):
+                    root.add_node(node)
                     return True
                 else:
                     self.previous_token()
@@ -402,10 +428,10 @@ class SyntaticAnalysis():
 
     def init_expression(self, root: Node):
         node = Node("init_expression")
-        root.add_node(node)
         if self.type_(node):
             self.next_token()
             if self.token_in(['id'], node):
+                root.add_node(node)
                 return True
             else:
                 self.previous_token()
@@ -415,7 +441,6 @@ class SyntaticAnalysis():
 
     def for_statement(self, root: Node):
         node = Node("for")
-        root.add_node(node)
         if self.token_in(['for_reserved'], node):
             self.next_token()
             if self.token_in(['op'], node):
@@ -433,36 +458,37 @@ class SyntaticAnalysis():
                                     if self.all(self.expecting - 1, node):
                                         self.next_token()
                                         if self.token_in(['close_curly_braces'], node):
+                                            root.add_node(node)
                                             return True
                                         
         return False
     
     def while_statement(self, root: Node):
         node = Node("while")
-        root.add_node(node)
         if self.token_in(['while_reserved'], node):
             self.next_token()
             if self.token_in(['op'], node):
                 self.next_token()
-                if self.condition():
+                if self.condition(node):
                     self.next_token()
                     if self.token_in(['cp'], node):
                         self.next_token()
                         if self.token_in(['open_curly_braces'], node):
                             self.next_token()
-                            if self.all(self.expecting - 1):
+                            if self.all(self.expecting - 1, node):
                                 self.next_token()
                                 if self.token_in(['close_curly_braces'], node):
+                                    root.add_node(node)
                                     return True
                                         
         return False
     
     def output(self, root: Node):
         node = Node("while")
-        root.add_node(node)
         if self.token_in(['output_reserved'], node):
             self.next_token()
             if self.value(node):
+                root.add_node(node)
                 return True
         
         return False

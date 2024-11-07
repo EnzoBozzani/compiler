@@ -1,6 +1,12 @@
+number a = 10
+number b
+
 if (condition){
     a = b
+
     if (condition){
         a = b
     }
 }
+
+number c
