@@ -1,6 +1,8 @@
+from models import Node
+
 class Tree:
     def __init__(self, root=None):
-        self.root = root
+        self.root: Node = root
 
     def set_root(self, node):
         self.root = node
@@ -31,3 +33,4 @@ class Tree:
     def print_tree(self):
         if self.root:
             print(self.root.get_tree())
+            

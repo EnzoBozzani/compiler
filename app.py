@@ -10,9 +10,9 @@ def compile(arg):
 
     syntatic_analyzer = SyntaticAnalysis(lexical_analyzer.tokens)
 
-    syntatic_analyzer.tree.print_tree()
+    semantic_analyzer = SemanticAnalysis()
 
-    semantic_analyzer = SemanticAnalysis(syntatic_analyzer.tree)
+    semantic_analyzer.analyze(syntatic_analyzer.tree.root)
 
     return lexical_analyzer.tokens, syntatic_analyzer.tree
         

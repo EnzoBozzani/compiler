@@ -1,7 +1,7 @@
 class Node:
     def __init__(self, name, enter="", exit=""):
         self.name = name
-        self.nodes = []
+        self.nodes: list[Node] = []
         self.enter = enter
         self.exit = exit
 
