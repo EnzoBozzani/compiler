@@ -1,50 +1,18 @@
-number abc = 5
+bool condition
+number i
 
-number b = abc + 10
-
-bool condition = true
-
-number highest
-
-if (abc>=b){
-    highest = a
-    if (condition){
-        highest = abc
-        if (condition){
-            highest = abc
-        }
-    }
-    highest = a
-    if (condition){
-        highest = abc
-    }
-} else {
-    highest = abc
+if ( condition ) {
+    output i
 }
 
-for ( a in 10 ) {
-    highest = abc
+if ( 1 + 1 == 2 ) {
+    output 2
 }
 
-while ( cnditi ) {
-    highest = abc
-    for ( a in 10 ) {
-        highest = abc
-        for ( a in 10 ) {
-            highest = abc
-        }
-    }
+while ( i < 10 ) {
+    output i
 }
 
-for ( a in 10 ) {
-    highest = abc
+for ( i in 10 ) {
+    output i
 }
-
-for ( a in 10 ) {
-    highest = abc
-}
-
-output oi + 10 - 4.5
-
-string oi = input
-

@@ -69,7 +69,7 @@ class SyntaticAnalysis():
     
 
     def error(self):
-        print(f"ERROR: Nenhuma regra encontrada para {self.token.to_string()}")
+        print(f"ERRO SINTÁTICO: Nenhuma regra encontrada para {self.token.to_string()}")
         sys.exit()
     
     def build_tree(self, rule):
@@ -97,7 +97,9 @@ class SyntaticAnalysis():
             return self.token.get_type() in args
 
         if self.token.get_type() in args:
-            node.add_node(Node(name=self.token.get_type()))
+            new = Node(name=self.token.get_type())
+            new.add_node(Node(name=self.token.get_lexem()))
+            node.add_node(new)
             return True
 
         return False
@@ -248,7 +250,7 @@ class SyntaticAnalysis():
         if self.token_in(['string', 'true', 'false', 'input_reserved'], node):
             root.add_node(node)
             return True
-        elif self.math_e():
+        elif self.math_e(node):
             root.add_node(node)
             return True
         
@@ -484,8 +486,18 @@ class SyntaticAnalysis():
         return False
     
     def output(self, root: Node):
-        node = Node("while")
+        node = Node("output")
         if self.token_in(['output_reserved'], node):
+            self.next_token()
+            if self.value(node):
+                root.add_node(node)
+                return True
+        
+        return False
+
+    def input(self, root: Node):
+        node = Node("input")
+        if self.token_in(['input_reserved'], node):
             self.next_token()
             if self.value(node):
                 root.add_node(node)

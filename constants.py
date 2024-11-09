@@ -44,7 +44,14 @@ unique_patterns: list[tuple[str, str]] = [
     ('equal', '=='),
     ('gte', '>='),
     ('lte', '<='),
-    ('lt', '<')
+    ('lt', '<'), 
+    ('if_reserved', 'if'),
+    ('else_reserved', 'else'),
+    ('number_reserved', 'number'),
+    ('string_reserved', 'string'),
+    ('while_reserved', 'while'),
+    ('for_reserved', 'for'),
+    ('in_reserved', 'in'),
 ]
 
 grammar: dict[str, list[str]] = {
@@ -68,7 +75,7 @@ grammar: dict[str, list[str]] = {
     'attr_expression': ['type id attr value', 'id attr value'],
     'init_expression': ['type id'],
     'while': ['while_reserved op condition cp open_curly_braces * close_curly_braces'],
-    'for': ['for_reserved op id in_reserved id_or_number cp open_curly_braces * close_curly_braces'],
-    'output_statement': ['output_reserved value'],
+    'for': ['for_reserved op number_reserved id in_reserved id_or_number cp open_curly_braces * close_curly_braces'],
+    'output': ['output_reserved value'],
     # TODO: input()
 }

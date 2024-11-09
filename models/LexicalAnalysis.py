@@ -28,6 +28,8 @@ class LexicalAnalysis():
                 print(f"ERROR: Token não reconhecido: '{word}'")
                 sys.exit()
 
+        for t in tokens:
+            print(t.to_string())
         self.tokens: list[Token] = tokens
 
     def word_matches_pattern(self, word_to_be_matched: str, pattern: str) -> bool:
@@ -112,6 +114,7 @@ class LexicalAnalysis():
                 for word in line.split(' '):
                     words.append(word.strip())
 
+        print(words)
         count = len(words)
         for i in range(count):
             word = words[i]
@@ -125,7 +128,26 @@ class LexicalAnalysis():
                         if char == pattern:
                             char_belongs_to_pattern = True
                             break
-                    if char_belongs_to_pattern:
+
+                    if char == '(':
+                        word_split.append(char)
+                        word_split.append(word[1:])
+                        new_word_split = [char]
+                        changed = False
+                        for word_split_index, new_char in enumerate(word_split[1]):
+                            if new_char in [u for _, u in unique_patterns]:
+                                if word_split[1][:word_split_index] == new_char:
+                                    new_word_split.append(word_split[1][:word_split_index])
+                                else:
+                                    new_word_split.append(word_split[1][:word_split_index])
+                                    new_word_split.append(new_char)
+                                word_split[1] = word_split[1][word_split_index + 1:]
+                                changed = True
+                        
+                        word_split = [a for a in new_word_split] if changed else [a for a in word_split]
+                        break
+                            
+                    elif char_belongs_to_pattern:
                         if new_word != '':
                             word_split.append(new_word)
                             new_word = ''
@@ -134,6 +156,7 @@ class LexicalAnalysis():
                         new_word += char
 
                 if len(word_split) >= 1:
+                    print('osisi', word_split)
                     words.pop(i)
                     count -= 1
                     for index in range(len(word_split)):
@@ -167,6 +190,11 @@ class LexicalAnalysis():
                 count -= 1
 
             elif word == '=' and next_word == '=':
+                words[i] = '=='
+                words.pop(i + 1)
+                count -= 1
+            
+            elif word == 'i' and next_word == 'n':
                 words[i] = '=='
                 words.pop(i + 1)
                 count -= 1
