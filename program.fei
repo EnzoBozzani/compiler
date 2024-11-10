@@ -1,15 +1,5 @@
-number a = 10
-number b = 20
-
-number highest
-
-if ( a > b ){
-    highest = a
-} else {
-    highest = b
-}
-
-output highest
-for ( i in 10 ){
-    output i
+if ( 10 > 5 ){
+    output "Informe o valor:"
+    string e = input
+    output e
 }

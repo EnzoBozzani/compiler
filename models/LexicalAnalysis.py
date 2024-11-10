@@ -9,6 +9,27 @@ class LexicalAnalysis():
     def __init__(self, file: str):
         words = self.extract_words_from_program(file)
 
+        start = None
+        end = None
+        for i, word in enumerate(words):
+            if word.startswith('"'):
+                start = i 
+                for j in range(i, len(words)):
+                    if words[j].endswith('"'):
+                        end = j
+                        break
+                break
+        if start != None:
+            full_word = ""
+            count = 0
+            for i in range(start, end + 1):
+                full_word += f"{words[i - count]} "
+                words.pop(i - count)
+                count += 1
+            
+            words.insert(start, full_word.strip())
+        
+
         tokens: list[Token] = []
 
         for word in words:

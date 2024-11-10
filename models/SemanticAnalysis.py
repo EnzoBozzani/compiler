@@ -9,8 +9,6 @@ class SemanticAnalysis:
 
         self._analyze_node(root)
 
-        print(self.translation)
-
     def error(self, message: str):
         print(f"ERRO SEMÂNTICO: {message}")
         sys.exit()
@@ -59,7 +57,7 @@ class SemanticAnalysis:
             if var_type == 'number_reserved':
                 if previous.name != 'number' and previous.name != 'id':
                     self.error(f'Não é possível atribuir {previous.name} ({current.name}) para variável de tipo number ({var_name})')
-            elif var_type == 'string_reserved' and previous.name != 'id':
+            elif var_type == 'string_reserved' and previous.name != 'id' and previous.name != 'input_reserved':
                 if previous.name != 'string' and previous.name != 'id':
                     self.error(f'Não é possível atribuir {previous.name} ({current.name}) para variável de tipo string ({var_name})')
             elif var_type == 'bool_reserved':

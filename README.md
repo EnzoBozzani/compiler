@@ -12,5 +12,6 @@
 
 ## Tasks:
 
--   Escopo das variáveis
+-   Identificar string
 -   Identação correta na tradução
+-   Escopo das variáveis
