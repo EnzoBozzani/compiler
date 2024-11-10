@@ -6,6 +6,9 @@ class SemanticAnalysis:
     def __init__(self, root: Node):
         self.symbol_table = SymbolTable()
         self.translation = ""
+        self.scopes = [0]
+        self.identations = 0
+        self.new_line = True
 
         self._analyze_node(root)
 
@@ -14,18 +17,25 @@ class SemanticAnalysis:
         sys.exit()
     
     def _analyze_node(self, node):
+        self.new_line = True
         if node.name == "attr_expression":
             self._analyze_attr_expression(node)
+            self.new_line = False
         elif node.name == "init_expression":
             self._analyze_init_expression(node)
+            self.new_line = False
         elif node.name == "if":
             self._analyze_if_statement(node)
+            self.new_line = False
         elif node.name == "for":
             self._analyze_for_statement(node)
+            self.new_line = False
         elif node.name == "while":
             self._analyze_while_statement(node)
+            self.new_line = False
         elif node.name == 'output':
             self._analyze_output(node)
+            self.new_line = False
         else:
             for child in node.nodes:
                 self._analyze_node(child)
@@ -88,7 +98,8 @@ class SemanticAnalysis:
             elif child.name == "condition":
                 self._analyze_expression(child)
             elif child.name == "all":
-                self._analyze_node(child)
+                self._analyze_node(child)\
+    
     
     def _analyze_output(self, node):
         for child in node.nodes:
@@ -96,6 +107,7 @@ class SemanticAnalysis:
                 self.translate(child)
             else:
                 self._analyze_expression(child, end=")\n")
+    
 
 
     def _analyze_for_statement(self, node: Node):
@@ -138,6 +150,11 @@ class SemanticAnalysis:
                 if var_type != 'number_reserved':
                     self.error(f'Variável no loop for deve ser do tipo number')
 
+        if node.name == 'open_curly_braces':
+            self.identations += 1
+        elif node.name == 'close_curly_braces':
+            self.identations -= 1
+
         map = {
             'if_reserved': 'if ',
             'else_reserved': 'else',
@@ -159,7 +176,7 @@ class SemanticAnalysis:
             'gte': '>=',
             'lte': '<=',
             'lt': '<',
-            'open_curly_braces': ':\n  ',
+            'open_curly_braces': ':\n',
             'close_curly_braces': '\n\r',
             'string': node.nodes[0].name,
             'add': '+',
@@ -173,6 +190,10 @@ class SemanticAnalysis:
             'init_expression': f"{node.nodes[1].nodes[0].name} = None\n" if node.name == 'init_expression' else ""
         }
 
+        if self.new_line:
+            for i in range(self.identations):
+                self.translation += "  "
+            
         self.translation += f"{map[node.name if special is None else special]}{end}" or ""
 
 

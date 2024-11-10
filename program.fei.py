@@ -1,6 +1,10 @@
-if (10>5):
-  print("Informe o valor:")
-e = input()
-print(e )
+a = 10
+b = 5
+highest = None
+if (a >b )  :
+  highest   =   a 
 
-
+else:
+  highest   =   b 
+
+print(highest )

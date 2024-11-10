@@ -8,10 +8,10 @@ class SymbolTable:
         if name in self.symbols:
             print(f"ERRO SEMÂNTICO: Variável '{name}' já foi declarada.")
             sys.exit()
-        self.symbols[name] = var_type
+        self.symbols[name] = { "var_type": var_type, "scope": [0] }
 
     def get_variable_type(self, name):
         if name not in self.symbols:
             print(f"ERRO SEMÂNTICO: Variável '{name}' não foi declarada.")
             sys.exit()
-        return self.symbols[name]
+        return self.symbols[name]["var_type"]

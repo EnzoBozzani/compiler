@@ -1,5 +1,13 @@
-if ( 10 > 5 ){
-    output "Informe o valor:"
-    string e = input
-    output e
+number a = 10
+number b = 5
+
+number highest
+
+if ( a > b ) {
+    highest = a
+
+} else {
+    highest = b
 }
+
+output highest

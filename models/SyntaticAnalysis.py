@@ -12,10 +12,7 @@ class SyntaticAnalysis():
         self.previous_tokens = []
         self.expecting = 0
         self.previous = None
-        self.internal_blocks = []
         self.token = self.tokens.pop(0)
-        self.first_exec = True
-
         self.root = Node("program")
         self.tree = Tree(self.root)
 
@@ -45,8 +42,7 @@ class SyntaticAnalysis():
         self.previous = self.token
         self.token = self.tokens.pop(0)
         if self.token_in(['open_curly_braces'], None): self.expecting += 1
-        if self.token_in(['close_curly_braces'], None): self.expecting -= 1
-    
+        if self.token_in(['close_curly_braces'], None): self.expecting -= 1    
 
     def previous_token(self):
         if self.token is not None: self.tokens.insert(0, self.token)
