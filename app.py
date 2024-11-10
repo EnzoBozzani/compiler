@@ -1,34 +1,13 @@
-import uuid
-
-from fastapi import FastAPI, UploadFile
-
 from models import SyntaticAnalysis, LexicalAnalysis, SemanticAnalysis
 
 
 def compile(arg):
     lexical_analyzer = LexicalAnalysis(arg)
 
-    syntatic_analyzer = SyntaticAnalysis(lexical_analyzer.tokens)
+    tokens_output = [t.to_string() for t in lexical_analyzer.tokens]
 
-    syntatic_analyzer.tree.print_tree()
+    syntatic_analyzer = SyntaticAnalysis(lexical_analyzer.tokens)
 
     semantic_analyzer = SemanticAnalysis(syntatic_analyzer.tree.root)
 
-    return lexical_analyzer.tokens, syntatic_analyzer.tree
-        
-app = FastAPI()
-
-@app.post("/")
-async def root(file: UploadFile):
-    id = uuid.uuid4()
-
-    with open(f"./temp/{id}", 'wb') as f:   
-        buffer = await file.read()
-        f.write(buffer)
-    
-    tokens, tree = compile(f"./temp/{id}")
-
-    return {
-        "tokens": tokens,
-        "tree": tree
-    }
+    return tokens_output, syntatic_analyzer.tree, semantic_analyzer.translation

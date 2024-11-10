@@ -4,6 +4,10 @@ from models import Token, Tree, Node
 
 class SyntaticAnalysis():
     def __init__(self, tokens: list[Token]):
+        if len(tokens) == 0:
+            print("ERRO: Arquivo vazio")
+            sys.exit()
+
         self.tokens = tokens
         self.previous_tokens = []
         self.expecting = 0
@@ -25,26 +29,10 @@ class SyntaticAnalysis():
                 first = False
             else:
                 self.next_token()
-            if self.if_statement(self.root):
-                # self.build_tree('if')
-                continue
-            elif self.attr_expression(self.root):
-                # self.build_tree('attr_expression')
-                continue
-            elif self.init_expression(self.root):
-                # self.build_tree('init_expression')
-                continue
-            elif self.for_statement(self.root):
-                # self.build_tree('for')
-                continue
-            elif self.while_statement(self.root):
-                # self.build_tree('while')
-                continue
-            elif self.output(self.root):
-                # self.build_tree('output')
+            if self.statement(self.root):
                 continue
             else:
-                self.error()
+                self.error() 
 
 
     def next_token(self):
@@ -71,23 +59,6 @@ class SyntaticAnalysis():
     def error(self):
         print(f"ERRO SINTÁTICO: Nenhuma regra encontrada para {self.token.to_string()}")
         sys.exit()
-    
-    def build_tree(self, rule):
-        tokens = []
-        if self.first_exec:
-            for i in range(len(self.previous_tokens) - 1, -1, -1):
-                tokens.append(self.previous_tokens[i])
-            tokens.append(self.previous)
-            tokens.append(self.token)
-            self.first_exec = False
-        else:
-            for i in range(len(self.previous_tokens) - 3, -1, -1):
-                tokens.append(self.previous_tokens[i])
-            tokens.append(self.previous)
-            tokens.append(self.token)
-
-        self.trees.append(Tree(rule=rule, nodes=tokens))
-        self.previous_tokens = []
 
 
     def token_in(self, args: list[str], node: Node | None):
@@ -104,27 +75,41 @@ class SyntaticAnalysis():
 
         return False
     
-
-    def math_e(self, root: Node):
-        node = Node("math_e")
-        if self.math_t(node):
+    def statement(self, root: Node):
+        if self.if_statement(root):
+            return True
+        elif self.attr_expression(root):
+            return True
+        elif self.init_expression(root):
+            return True
+        elif self.for_statement(root):
+            return True
+        elif self.while_statement(root):
+            return True
+        elif self.output(root):
+            return True
+        else:
+            return False
+        
+    def expr(self, root: Node):
+        node = Node("expr")
+        if self.factor(node):
             self.next_token()
-            if self.math_e_(node):
+            if self.expr_(node):
                 root.add_node(node)
                 return True
             else:
                 self.previous_token()
-        
+
         return False
-
-
-    def math_e_(self, root: Node):
-        node = Node("math_e'")
-        if self.token_in(['add', 'sub'], node):
+    
+    def expr_(self, root: Node):
+        node = Node("expr'")
+        if self.token_in(['add', 'sub', 'mult', 'div'], node):
             self.next_token()
-            if self.math_t(node):
+            if self.factor(node):
                 self.next_token()
-                if self.math_e_(node):
+                if self.expr_(node):
                     root.add_node(node)
                     return True
                 else:
@@ -133,124 +118,40 @@ class SyntaticAnalysis():
             else:
                 self.previous_token()
         
-        self.previous_token()
         root.add_node(node)
+        self.previous_token()
         return True
 
-
-    def math_t(self, root: Node):
-        node = Node("math_t")
-        if self.math_f(node):
+    def factor(self, root: Node):
+        node = Node("factor")
+        if self.token_in(['number', 'id'], node):
+            root.add_node(node)
+            return True
+        elif self.token_in(['op'], node):
             self.next_token()
-            if self.math_t_(node):
-                root.add_node(node)
-                return True
-            else:
-                self.previous_token()
-        
-        return False
-
-
-    def math_t_(self, root: Node):
-        node = Node("math_t'")
-        if self.token_in(['mult', 'div'], node):
-            self.next_token()
-            if self.math_f(node):
-                self.next_token()
-                if self.math_t_(node):
-                    root.add_node(node)
-                    return True
-                else: 
-                    self.previous_token()
-                    self.previous_token()
-            else:
-                self.previous_token()
-        
-        self.previous_token()
-        root.add_node(node)
-        return True
-    
-
-    def math_f(self, root: Node):
-        node = Node("math_f")
-        if self.token_in(['op'], node):
-            self.next_token()
-            if self.math_e(node):
+            if self.expr(node):
                 self.next_token()
                 if self.token_in(['cp'], node):
                     root.add_node(node)
                     return True
-                else: 
-                    self.previous_token()
-                    self.previous_token()
-            else:
-                self.previous_token()
-
-        elif self.math_n(node):
-            root.add_node(node)
-            return True
-
-        return False
-    
-
-    def math_n(self, root: Node):
-        node = Node("math_n")
-        if self.math_d(node):
-            self.next_token()
-            if self.math_n_(node):
-                root.add_node(node)
-                return True
-            else:
-                self.previous_token()
-        
-        return False
-    
-
-    def math_n_(self, root: Node):
-        node = Node("math_n'")
-        if self.math_d(node):
-            self.next_token()
-            if self.math_n_(node):
-                root.add_node(node)
-                return True
-            else: 
-                self.previous_token()
-        
-        self.previous_token()
-        root.add_node(node)
-        return True
-    
-
-    def math_d(self, root: Node):
-        node = Node("math_d")
-        if self.token_in(['id', 'number'], node):
-            root.add_node(node)
-            return True
-        
-        return False
-    
-
-    def value(self, root: Node):
-        node = Node("value")
-        if self.token_in(['id', 'number'], node):
-            self.next_token()
-            if self.token_in(['add', 'sub', 'div', 'mult'], node):
-                self.next_token()
-                if self.math_e(node):
-                    root.add_node(node)
-                    return True
                 else:
                     self.previous_token()
                     self.previous_token()
             else:
                 self.previous_token()
-                root.add_node(node)
-                return True
 
-        if self.token_in(['string', 'true', 'false', 'input_reserved'], node):
+        return False    
+
+
+    def value(self, root: Node):
+        node = Node("value")
+        if self.expr(node):
             root.add_node(node)
             return True
-        elif self.math_e(node):
+        elif self.token_in(['id', 'true', 'false', 'string'], node):
+            root.add_node(node)
+            return True
+        elif self.input(node):
             root.add_node(node)
             return True
         
@@ -363,17 +264,7 @@ class SyntaticAnalysis():
             else:
                 self.next_token()
 
-            if self.if_statement(node):
-                continue
-            elif self.attr_expression(node):
-                continue
-            elif self.init_expression(node):
-                continue
-            elif self.for_statement(node):
-                continue
-            elif self.while_statement(node):
-                continue
-            elif self.output(node):
+            if self.statement(node):
                 continue
             else:
                 self.error()
@@ -498,9 +389,7 @@ class SyntaticAnalysis():
     def input(self, root: Node):
         node = Node("input")
         if self.token_in(['input_reserved'], node):
-            self.next_token()
-            if self.value(node):
-                root.add_node(node)
-                return True
+            root.add_node(node)
+            return True
         
         return False

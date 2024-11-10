@@ -25,11 +25,9 @@ class LexicalAnalysis():
                     tokens.append(Token(typ, word))
                     break   
             if not token_recognized:
-                print(f"ERROR: Token não reconhecido: '{word}'")
+                print(f"ERRO LÉXICO: Token não reconhecido: '{word}'")
                 sys.exit()
-
-        for t in tokens:
-            print(t.to_string())
+                
         self.tokens: list[Token] = tokens
 
     def word_matches_pattern(self, word_to_be_matched: str, pattern: str) -> bool:
@@ -114,7 +112,6 @@ class LexicalAnalysis():
                 for word in line.split(' '):
                     words.append(word.strip())
 
-        print(words)
         count = len(words)
         for i in range(count):
             word = words[i]
@@ -156,7 +153,6 @@ class LexicalAnalysis():
                         new_word += char
 
                 if len(word_split) >= 1:
-                    print('osisi', word_split)
                     words.pop(i)
                     count -= 1
                     for index in range(len(word_split)):

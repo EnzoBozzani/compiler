@@ -12,4 +12,5 @@
 
 ## Tasks:
 
--   Buildar árvores (se tá aninhado, colocar dentro)
+-   Escopo das variáveis
+-   Identação correta na tradução

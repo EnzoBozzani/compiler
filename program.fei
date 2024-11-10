@@ -1,18 +1,15 @@
-bool condition
-number i
+number a = 10
+number b = 20
 
-if ( condition ) {
-    output i
+number highest
+
+if ( a > b ){
+    highest = a
+} else {
+    highest = b
 }
 
-if ( 1 + 1 == 2 ) {
-    output 2
-}
-
-while ( i < 10 ) {
-    output i
-}
-
-for ( i in 10 ) {
+output highest
+for ( i in 10 ){
     output i
 }

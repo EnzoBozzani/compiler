@@ -10,6 +10,10 @@ class SemanticAnalysis:
         self._analyze_node(root)
 
         print(self.translation)
+
+    def error(self, message: str):
+        print(f"ERRO SEMÂNTICO: {message}")
+        sys.exit()
     
     def _analyze_node(self, node):
         if node.name == "attr_expression":
@@ -45,10 +49,24 @@ class SemanticAnalysis:
         if var_name and var_type:
             self.symbol_table.declare_variable(var_name, var_type)
         elif var_name and not var_type:
-            self.symbol_table.get_variable_type(var_name)
+            var_type = self.symbol_table.get_variable_type(var_name)
+            current = node.nodes[2]
+            previous = node
+            while len(current.nodes) > 0:
+                previous = current
+                current = current.nodes[0]
+            
+            if var_type == 'number_reserved':
+                if previous.name != 'number' and previous.name != 'id':
+                    self.error(f'Não é possível atribuir {previous.name} ({current.name}) para variável de tipo number ({var_name})')
+            elif var_type == 'string_reserved' and previous.name != 'id':
+                if previous.name != 'string' and previous.name != 'id':
+                    self.error(f'Não é possível atribuir {previous.name} ({current.name}) para variável de tipo string ({var_name})')
+            elif var_type == 'bool_reserved':
+                if previous.name != 'true' and previous.name != 'false':
+                    self.error(f'Não é possível atribuir {previous.name} ({current.name}) para variável de tipo bool ({var_name})')
         else:
-            print(f"ERRO SEMÂNTICO: Atribuição inválida ({[n.name for n in child.nodes ]})")
-            sys.exit()
+            self.error(f"Atribuição inválida")
 
     def _analyze_init_expression(self, node):
         var_type = None
@@ -63,12 +81,11 @@ class SemanticAnalysis:
             self.symbol_table.declare_variable(var_name, var_type)
             self.translate(node)
         else:
-            print(f"ERRO SEMÂNTICO: Inicialização inválida ({child.name})")
-            sys.exit()
+            self.error(f"Inicialização")
 
     def _analyze_if_statement(self, node):
         for child in node.nodes:
-            if child.name in ['if_reserved', "op", 'cp', 'open_curly_braces', 'close_curly_braces']:
+            if child.name in ['if_reserved', "op", 'cp', 'open_curly_braces', 'close_curly_braces', 'else_reserved']:
                 self.translate(child)
             elif child.name == "condition":
                 self._analyze_expression(child)
@@ -83,13 +100,15 @@ class SemanticAnalysis:
                 self._analyze_expression(child, end=")\n")
 
 
-    def _analyze_for_statement(self, node):
-        for child in node.nodes:
-            if child.name in ['for_reserved', "op", 'cp', 'open_curly_braces', 'close_curly_braces', 'in_reserved']:
+    def _analyze_for_statement(self, node: Node):
+        for i, child in enumerate(node.nodes):
+            if child.name in ['for_reserved', 'open_curly_braces', 'close_curly_braces', 'in_reserved']:
                 self.translate(child)
-            elif child.name == "id":
-                self.symbol_table.get_variable_type(child.nodes[0].name) 
+            elif i == 2:
+                self.symbol_table.declare_variable(child.nodes[0].name, var_type='number') 
                 self.translate(child)
+            elif i == 4:
+                self.translate(node.nodes[4], special="id_or_number")
             elif child.name == "all":
                 self._analyze_node(child)
 
@@ -108,19 +127,26 @@ class SemanticAnalysis:
                 var_name = child.nodes[0].name
                 self.symbol_table.get_variable_type(var_name)
                 self.translate(child, end=end)
-            elif child.name in ["number", "string", "add", "sub", "mult", "div", "op", "cp", "true", "false", "gt", "equal", "gte", "lte", "lt"]:
+            elif child.name in ["number", "string", "add", "sub", "mult", "div", "op", "cp", "true", "false", "gt", "equal", "gte", "lte", "lt", "input_reserved"]:
                 self.translate(child, end=end if len(node.nodes) == 1 else " ")   
             else:
                 self._analyze_expression(child, end=end)
     
-    def translate(self, node: Node, end = ""):
+    def translate(self, node: Node, end = "", special = None):
+        if special is not None and special == 'id_or_number':
+            if node.name == 'id':
+                var_type = self.symbol_table.get_variable_type(node.nodes[0].name)
+                
+                if var_type != 'number_reserved':
+                    self.error(f'Variável no loop for deve ser do tipo number')
+
         map = {
             'if_reserved': 'if ',
             'else_reserved': 'else',
             'number_reserved': '',
             'string_reserved': '',
             'while_reserved': 'while',
-            'for_reserved': 'for',
+            'for_reserved': 'for ',
             'output_reserved': 'print(',
             'input_reserved': 'input()',
             'in_reserved': 'in',
@@ -142,11 +168,13 @@ class SemanticAnalysis:
             'sub': '-',
             'mult': '*',
             'div': '/',
+            'id_or_number': f' range({node.nodes[0].name})',
+            'for_p': '',
             'number': node.nodes[0].name,
             'id': f"{node.nodes[0].name} ",
             'init_expression': f"{node.nodes[1].nodes[0].name} = None\n" if node.name == 'init_expression' else ""
         }
 
-        self.translation += f"{map[node.name]}{end}" or ""
+        self.translation += f"{map[node.name if special is None else special]}{end}" or ""
 
 

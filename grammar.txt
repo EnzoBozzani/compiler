@@ -1,0 +1,49 @@
+if_reserved -> 'if'
+else_reserved -> 'else'
+number_reserved -> 'number'
+string_reserved -> 'string'
+while_reserved -> 'while'
+for_reserved -> 'for'
+output_reserved -> 'output'
+input_reserved -> 'input'
+in_reserved -> 'in'
+bool_reserved -> 'bool'
+true -> 'true'
+false -> 'false'
+op -> '('
+cp -> ')'
+gt -> '>'
+attr -> '='
+equal -> '=='
+gte -> '>='
+lte -> '<='
+lt -> '<'
+open_curly_braces -> '{'
+close_curly_braces -> '}'
+string -> '".*"'
+add -> '+'
+sub -> '-'
+mult -> '*'
+div -> '/'
+number -> (0-9)+ | (0-9)*.(0-9)+
+id -> (a-z|A-Z)(a-z|A-Z|0-9|_)*
+
+expr -> factor expr’
+expr' -> add factor expr’ ∣ sub factor expr’ ∣ mult factor expr’ ∣ div factor expr’ ∣ ε
+factor -> number | id | op expr cp
+value -> id | true | false | expr | string | input
+string -> ".*"
+condition -> value condition'
+condition' -> comparison_operator value | ε
+comparison_operator -> gt | equal | gte | lte | lt
+if -> if_reserved op condition cp open_curly_braces statement+ close_curly_braces else
+else -> else' | ε
+else' -> else_reserved | open_curly_braces | statement+ | close_curly_braces
+statement -> if | for | while | output | attr_expression | init_expression 
+type -> number_reserved | bool_reserved | string_reserved 
+attr_expression -> type id attr value | id attr value
+init_expression -> type id
+while -> while_reserved op condition cp open_curly_braces statement+ close_curly_braces
+for -> for_reserved op number_reserved id in_reserved id_or_number cp open_curly_braces statement+ close_curly_braces
+output -> output_reserved value
+input -> input_reserved

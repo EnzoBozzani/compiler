@@ -1,5 +1,6 @@
 number a = 10
 number b
+bool condition = true
 
 if (condition){
     a = b
