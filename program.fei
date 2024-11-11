@@ -3,6 +3,8 @@ number b = 5.7
 
 number highest
 
+bool condition
+
 if ( a > b ) {
     highest = a
 
@@ -12,7 +14,7 @@ if ( a > b ) {
         output "Funcionou bem oaoo"
 
         if ( true ) {
-            output "Blabla"
+            output b
 
             if ( true ) {
                 output "Blabla"
@@ -37,7 +39,14 @@ if ( a > b ) {
     highest = b
 }
 
-abc = 89
+
+if ( false ) {
+    condition = false
+} else {
+    condition = true
+}
+
+output condition
 
 output highest
 

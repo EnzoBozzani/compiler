@@ -6,7 +6,6 @@ class SemanticAnalysis:
     def __init__(self, root: Node):
         self.symbol_table = SymbolTable()
         self.translation = ""
-        self.scopes = [0]
         self.identations = 0
 
         self._analyze_node(root)
@@ -87,13 +86,18 @@ class SemanticAnalysis:
 
     def _analyze_if_statement(self, node):
         self.translation += '\n'
+        self.symbol_table.enter_scope()  # Entra no escopo do if
+
         for child in node.nodes:
             if child.name in ['if_reserved', "op", 'cp', 'open_curly_braces', 'close_curly_braces', 'else_reserved']:
                 self.translate(child)
             elif child.name == "condition":
                 self._analyze_expression(child)
             elif child.name == "all":
-                self._analyze_node(child)\
+                self._analyze_node(child)
+
+        self.symbol_table.exit_scope()  # Sai do escopo do if
+
     
     
     def _analyze_output(self, node):
@@ -110,19 +114,27 @@ class SemanticAnalysis:
 
     def _analyze_for_statement(self, node: Node):
         self.translation += '\n'
+        self.symbol_table.enter_scope()
+
         for i, child in enumerate(node.nodes):
             if child.name in ['for_reserved', 'open_curly_braces', 'close_curly_braces', 'in_reserved']:
                 self.translate(child)
-            elif i == 2:
-                self.symbol_table.declare_variable(child.nodes[0].name, var_type='number') 
+            elif i == 2: 
+                var_name = child.nodes[0].name
+                self.symbol_table.declare_variable(var_name, var_type='number')
                 self.translate(child)
             elif i == 4:
                 self.translate(node.nodes[4], special="id_or_number")
             elif child.name == "all":
                 self._analyze_node(child)
 
+        self.symbol_table.exit_scope() 
+
+
     def _analyze_while_statement(self, node):
         self.translation += '\n'
+        self.symbol_table.enter_scope()
+
         for child in node.nodes:
             if child.name in ['while_reserved', "op", 'cp', 'open_curly_braces', 'close_curly_braces']:
                 self.translate(child)
@@ -130,6 +142,8 @@ class SemanticAnalysis:
                 self._analyze_expression(child)
             elif child.name == "all":
                 self._analyze_node(child)
+        
+        self.symbol_table.exit_scope()
 
     def _analyze_expression(self, node):    
         for child in node.nodes:

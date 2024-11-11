@@ -2,6 +2,8 @@ a = 10
 b = 5.7
 highest = None
 
+condition = None
+
 if (a >b )  :
 
   highest   =   a 
@@ -11,7 +13,7 @@ if (a >b )  :
     print(    "Funcionou bem oaoo")
     if     (    True    )      :
 
-      print(      "Blabla")
+      print(      b )
       if       (      True      )        :
 
         print(        "Blabla")
@@ -36,7 +38,14 @@ if (a >b )  :
 
   highest   =   b 
 
-abc = 89
+if (False)  :
+
+  condition   =   False
+else  :
+
+  condition   =   True
+
+print(condition )
 print(highest )
 c = highest-(50+7)
 print(c+10)
