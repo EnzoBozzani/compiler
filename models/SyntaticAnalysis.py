@@ -45,11 +45,11 @@ class SyntaticAnalysis():
         if self.token_in(['close_curly_braces'], None): self.expecting -= 1 
 
     def previous_token(self):
+        if self.token_in(['open_curly_braces'], None): self.expecting -= 1
+        if self.token_in(['close_curly_braces'], None): self.expecting += 1
         if self.token is not None: self.tokens.insert(0, self.token)
         self.token = self.previous
         self.previous = self.previous_tokens.pop(0) if len(self.previous_tokens) > 0 else None
-        if self.token_in(['open_curly_braces'], None): self.expecting -= 1
-        if self.token_in(['close_curly_braces'], None): self.expecting += 1
     
 
     def error(self):
@@ -94,8 +94,6 @@ class SyntaticAnalysis():
             if self.expr_(node):
                 root.add_node(node)
                 return True
-            else:
-                self.previous_token()
 
         return False
     
@@ -141,10 +139,10 @@ class SyntaticAnalysis():
 
     def value(self, root: Node):
         node = Node("value")
-        if self.expr(node):
+        if self.token_in(['true', 'false', 'string'], node):
             root.add_node(node)
             return True
-        elif self.token_in(['id', 'true', 'false', 'string'], node):
+        elif self.expr(node):
             root.add_node(node)
             return True
         elif self.input(node):
@@ -214,7 +212,6 @@ class SyntaticAnalysis():
                                             if self.all(self.expecting - 1, node):
                                                 self.next_token()
                                                 if self.token_in(['close_curly_braces'], node):
-                                                    if len(self.tokens) > 0: self.previous_token()
                                                     root.add_node(node)
                                                     return True
                                     else:
@@ -260,14 +257,12 @@ class SyntaticAnalysis():
                 first = False
             else:
                 self.next_token()
-
+            
             if self.expecting == exp:
+                self.previous_token()
                 root.add_node(node)
                 return True
-
-            if self.statement(node):
-                continue
-            else:
+            elif not self.statement(node):
                 self.error()
 
         root.add_node(node)

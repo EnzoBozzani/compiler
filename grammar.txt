@@ -31,7 +31,7 @@ id -> (a-z|A-Z)(a-z|A-Z|0-9|_)*
 expr -> factor expr’
 expr' -> add factor expr’ ∣ sub factor expr’ ∣ mult factor expr’ ∣ div factor expr’ ∣ ε
 factor -> number | id | op expr cp
-value -> id | true | false | expr | string | input
+value -> true | false | expr | string | input
 string -> ".*"
 condition -> value condition'
 condition' -> comparison_operator value | ε

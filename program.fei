@@ -1,13 +1,15 @@
 number a = 10
-number b = 5
+number b = 5.7
 
 number highest
 
 if ( a > b ) {
     highest = a
 
+    number abc = 10
+
     if ( true ) {
-        output "Funcionou bem"
+        output "Funcionou bem oaoo"
 
         if ( true ) {
             output "Blabla"
@@ -17,17 +19,30 @@ if ( a > b ) {
 
                 if ( true ) {
                     output "Blabla"
+                } else {
+                    output "Blablu"
                 }
             }
         }
+    }
+
+    for ( i in a ) {
+
+        while ( i < 5 ) {
+            i = i + 1
+        } 
     }
 
 } else {
     highest = b
 }
 
+abc = 89
+
 output highest
 
 number c = highest - ( 50 + 7 )
 
-output c
+output c + 10
+
+
