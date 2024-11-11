@@ -6,8 +6,28 @@ number highest
 if ( a > b ) {
     highest = a
 
+    if ( true ) {
+        output "Funcionou bem"
+
+        if ( true ) {
+            output "Blabla"
+
+            if ( true ) {
+                output "Blabla"
+
+                if ( true ) {
+                    output "Blabla"
+                }
+            }
+        }
+    }
+
 } else {
     highest = b
 }
 
 output highest
+
+number c = highest - ( 50 + 7 )
+
+output c

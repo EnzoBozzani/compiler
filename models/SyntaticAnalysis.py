@@ -42,7 +42,7 @@ class SyntaticAnalysis():
         self.previous = self.token
         self.token = self.tokens.pop(0)
         if self.token_in(['open_curly_braces'], None): self.expecting += 1
-        if self.token_in(['close_curly_braces'], None): self.expecting -= 1    
+        if self.token_in(['close_curly_braces'], None): self.expecting -= 1 
 
     def previous_token(self):
         if self.token is not None: self.tokens.insert(0, self.token)
@@ -214,6 +214,7 @@ class SyntaticAnalysis():
                                             if self.all(self.expecting - 1, node):
                                                 self.next_token()
                                                 if self.token_in(['close_curly_braces'], node):
+                                                    if len(self.tokens) > 0: self.previous_token()
                                                     root.add_node(node)
                                                     return True
                                     else:
@@ -259,6 +260,10 @@ class SyntaticAnalysis():
                 first = False
             else:
                 self.next_token()
+
+            if self.expecting == exp:
+                root.add_node(node)
+                return True
 
             if self.statement(node):
                 continue
